@@ -3,51 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飛來發預約助手</title>
+    <title>飛來發線上預約</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #ffffff; }
-        .container { text-align: center; width: 90%; }
-        .btn { background-color: #00b900; color: white; border: none; padding: 20px; border-radius: 15px; font-size: 20px; cursor: pointer; width: 100%; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .loading { color: #888; font-size: 14px; margin-top: 10px; }
+        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn { background-color: #00b900; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn:active { background-color: #009000; }
+        h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <button class="btn" id="sendBtn">🀄️ 帶入預約格式 🀄️</button>
-    <div id="status" class="loading">正在啟動預約系統...</div>
-</div>
+    <h2>🀄️ 飛來發預約單 🀄️</h2>
 
-<script>
-    async function main() {
-        const status = document.getElementById('status');
-        
-        try {
-            // 【重要】請把下方的 您的_LIFF_ID 替換成您剛才複製的那串 ID
+    <div class="form-group">
+        <label>預約時間</label>
+        <input type="datetime-local" id="time">
+    </div>
+
+    <div class="form-group">
+        <label>上車地點</label>
+        <input type="text" id="pickup" placeholder="請輸入地址或地標">
+    </div>
+
+    <div class="form-group">
+        <label>下車地點</label>
+        <input type="text" id="dropoff" placeholder="請輸入目的地">
+    </div>
+
+    <div class="form-group">
+        <label>乘車人數</label>
+        <select id="passengers">
+            <option value="1人">1人</option>
+            <option value="2人">2人</option>
+            <option value="3人">3人</option>
+            <option value="4人">4人</option>
+            <option value="5人以上">5人以上 (請於備註說明)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>備註 (行李/禁菸等)</label>
+        <textarea id="note" rows="2" placeholder="例：有大行李、不菸不檳榔"></textarea>
+    </div>
+
+    <button class="btn" id="submitBtn">確認送出預約</button>
+
+    <script>
+        async function main() {
+            // 【重要】請務必填入您的 LIFF ID
             await liff.init({ liffId: "2009263508-NTuggdp5" });
-            
-            status.innerText = "系統已就緒";
 
-            document.getElementById('sendBtn').addEventListener('click', async () => {
+            document.getElementById('submitBtn').addEventListener('click', async () => {
+                const time = document.getElementById('time').value;
+                const pickup = document.getElementById('pickup').value;
+                const dropoff = document.getElementById('dropoff').value;
+                const passengers = document.getElementById('passengers').value;
+                const note = document.getElementById('note').value || "無";
+
+                if (!time || !pickup || !dropoff) {
+                    alert("請填寫時間、上車及下車地點");
+                    return;
+                }
+
+                const msg = `🀄️飛來發預約單🀄️\n時間：${time.replace('T', ' ')}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${note}`;
+
                 try {
-                    // 發送訊息到對話框
                     await liff.sendMessages([{
                         type: 'text',
-                        text: '🀄️飛來發🀄️\n時間：\n上車：\n下車：\n人數：\n備註：行李/如需🈲菸🈲檳榔'
+                        text: msg
                     }]);
-                    // 發送完畢後自動關閉視窗
-                    liff.closeWindow();
+                    liff.closeWindow(); // 送出後關閉視窗
                 } catch (err) {
-                    alert("請在 LINE 內開啟此頁面");
+                    console.error(err);
+                    alert("傳送失敗，請確認是否在 LINE 開啟");
                 }
             });
-        } catch (err) {
-            status.innerText = "啟動失敗，請確認 LIFF ID 設定";
         }
-    }
-    main();
-</script>
-
+        main();
+    </script>
 </body>
 </html>
