@@ -1,101 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🀄️飛來發預約</title>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-<style>
-body{
-font-family:Arial;
-padding:20px;
-background:#f4f4f4;
-}
-.container{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-h2{
-text-align:center;
-}
-input, textarea{
-width:100%;
-padding:10px;
-margin-top:5px;
-margin-bottom:15px;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:16px;
-}
-button{
-width:100%;
-padding:15px;
-background:#009900;
-color:white;
-font-size:18px;
-border:none;
-border-radius:8px;
-}
-button:active{
-background:#007700;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🀄️飛來發預約系統</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        h2 { color: #d32f2f; }
+        .booking-text { background: #eee; padding: 15px; border-radius: 8px; text-align: left; white-space: pre-wrap; font-size: 16px; margin: 15px 0; border: 1px solid #ddd; }
+        button { background-color: #00b900; color: white; border: none; padding: 12px 20px; border-radius: 25px; font-size: 18px; cursor: pointer; width: 100%; font-weight: bold; }
+        button:active { background-color: #009000; }
+        .tip { font-size: 12px; color: #666; margin-top: 10px; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
-<h2>🀄️飛來發🀄️<br>預約單</h2>
+<div class="card">
+    <h2>🀄️ 飛來發 🀄️</h2>
+    <p>請點擊下方按鈕複製格式<br>回到 LINE 貼上並填寫資訊</p>
+    
+    <div class="booking-text" id="copyTarget">🀄️飛來發🀄️
+時間：
+上車：
+下車：
+人數：
+備註：行李/如需🈲菸🈲檳榔</div>
 
-<label>時間</label>
-<input id="time" placeholder="請輸入搭乘時間">
-
-<label>上車地點</label>
-<input id="start" placeholder="請輸入上車地址">
-
-<label>下車地點</label>
-<input id="end" placeholder="請輸入下車地址">
-
-<label>人數</label>
-<input id="people" placeholder="幾位乘客">
-
-<label>備註</label>
-<textarea id="note" placeholder="行李數量 / 是否需要🈲菸🈲檳榔"></textarea>
-
-<button onclick="send()">送出預約</button>
+    <button onclick="copyText()">一鍵複製預約格式</button>
+    
+    <p class="tip">複製成功後，請直接回到 LINE 對話框貼上</p>
 </div>
 
 <script>
-async function main(){
-await liff.init({ liffId:"LIFF_ID" });
-}
-main();
-
-async function send(){
-
-if(!time.value || !start.value || !end.value){
-alert("請填寫完整資料");
-return;
-}
-
-const text =
-`🀄️飛來發🀄️
-時間：${time.value}
-上車地點：${start.value}
-下車地點：${end.value}
-人數：${people.value}
-備註：${note.value}`;
-
-await liff.sendMessages([
-{ type:"text", text:text }
-]);
-
-alert("預約已送出！");
-liff.closeWindow();
-}
+    function copyText() {
+        const text = document.getElementById('copyTarget').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('已複製成功！請回到 LINE 貼上。');
+        }).catch(err => {
+            alert('複製失敗，請手動選取文字複製。');
+        });
+    }
 </script>
 
 </body>
