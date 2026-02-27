@@ -8,14 +8,15 @@
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .is-now-group { display: flex; align-items: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
-        .is-now-group input { width: auto; margin-right: 10px; transform: scale(1.5); }
+        .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
+        .time-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background: white; text-align: center; cursor: pointer; font-weight: bold; }
+        .time-btn.active { border-color: #00b900; background-color: #e6f7e6; color: #00b900; }
         .btn { background-color: #00b900; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn:active { background-color: #009000; }
         h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
-        .disabled-input { background-color: #eee; color: #888; }
+        #timeInputSection { display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -24,11 +25,15 @@
 
     <div class="form-group">
         <label>用車時間</label>
-        <div class="is-now-group">
-            <input type="checkbox" id="isNow" onchange="toggleTimeInput()"> 
-            <label for="isNow" style="margin-bottom:0; cursor:pointer;"> 現在（即時）</label>
+        <div class="time-options">
+            <div id="btnNow" class="time-btn active" onclick="selectTimeType('now')">現在（即時）</div>
+            <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車專區</div>
         </div>
-        <input type="datetime-local" id="time">
+        
+        <div id="timeInputSection">
+            <label style="font-size: 12px; color: #666;">請選取預約日期與時間：</label>
+            <input type="datetime-local" id="time">
+        </div>
     </div>
 
     <div class="form-group">
@@ -60,16 +65,22 @@
     <button class="btn" id="submitBtn">確認送出預約</button>
 
     <script>
-        function toggleTimeInput() {
-            const isNow = document.getElementById('isNow').checked;
-            const timeInput = document.getElementById('time');
-            if (isNow) {
-                timeInput.disabled = true;
-                timeInput.classList.add('disabled-input');
-                timeInput.value = ""; // 清空內容
+        let selectedType = 'now';
+
+        function selectTimeType(type) {
+            selectedType = type;
+            const btnNow = document.getElementById('btnNow');
+            const btnBooking = document.getElementById('btnBooking');
+            const timeSection = document.getElementById('timeInputSection');
+
+            if (type === 'now') {
+                btnNow.classList.add('active');
+                btnBooking.classList.remove('active');
+                timeSection.style.display = 'none';
             } else {
-                timeInput.disabled = false;
-                timeInput.classList.remove('disabled-input');
+                btnNow.classList.remove('active');
+                btnBooking.classList.add('active');
+                timeSection.style.display = 'block';
             }
         }
 
@@ -78,18 +89,16 @@
             await liff.init({ liffId: "2009263508-NTuggdp5" });
 
             document.getElementById('submitBtn').addEventListener('click', async () => {
-                const isNow = document.getElementById('isNow').checked;
                 const timeValue = document.getElementById('time').value;
                 const pickup = document.getElementById('pickup').value;
                 const dropoff = document.getElementById('dropoff').value;
                 const passengers = document.getElementById('passengers').value;
                 const note = document.getElementById('note').value || "無";
 
-                // 時間字串處理
-                let finalTime = isNow ? "即時" : timeValue.replace('T', ' ');
+                let finalTime = (selectedType === 'now') ? "即時" : timeValue.replace('T', ' ');
 
-                if (!isNow && !timeValue) {
-                    alert("請選取預約時間或勾選「即時」");
+                if (selectedType === 'booking' && !timeValue) {
+                    alert("請選取預約叫車的時間");
                     return;
                 }
                 if (!pickup || !dropoff) {
