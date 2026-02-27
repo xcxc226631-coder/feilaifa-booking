@@ -6,30 +6,50 @@
     <title>推薦飛來發</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 40px 20px; background: #fff; }
-        .logo { width: 80px; border-radius: 50%; margin-bottom: 20px; }
-        .title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
-        .desc { color: #666; margin-bottom: 30px; line-height: 1.6; }
-        .btn-share { background: #00b900; color: white; padding: 15px; border-radius: 30px; text-decoration: none; display: block; font-weight: bold; font-size: 18px; border: none; width: 100%; }
+        body { font-family: -apple-system, sans-serif; text-align: center; padding: 40px 20px; background: #fff; color: #333; }
+        .logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; border: 2px solid #d32f2f; }
+        .title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #d32f2f; }
+        .desc { color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 16px; }
+        .btn-share { background: #00b900; color: white; padding: 18px; border-radius: 35px; text-decoration: none; display: block; font-weight: bold; font-size: 18px; border: none; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(0,185,0,0.3); }
+        .btn-share:active { background: #009000; transform: scale(0.98); }
     </style>
 </head>
 <body>
-    <img src="您的LOGO圖址" class="logo">
-    <div class="title">🀄️ 推薦飛來發車隊 🀄️</div>
-    <div class="desc">如果您滿意我們的服務<br>歡迎點擊下方按鈕分享給好友！</div>
+    <img src="https://xcxc226631-coder.github.io/feilaifa-booking/logo.png" class="logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2099/2099122.png'">
     
-    <button class="btn-share" id="shareBtn">推薦給好友</button>
+    <div class="title">🀄️ 推薦飛來發車隊 🀄️</div>
+    <div class="desc">滿意我們的服務嗎？<br>點擊下方按鈕分享名片給好友<br>讓更多人享受優質接送！</div>
+    
+    <button class="btn-share" id="shareBtn">立即推薦給好友</button>
 
     <script>
         async function main() {
-            await liff.init({ liffId: "2009263508-0qU0PuCk" }); // 使用同一個 LIFF ID 即可
+            // 填入您為「分享功能」申請的第二個 LIFF ID
+            await liff.init({ liffId: "2009263508-0qU0PuCk" });
 
-            document.getElementById('shareBtn').addEventListener('click', () => {
-                // 這是 LINE 的專屬分享視窗路徑
-                liff.openWindow({
-                    url: "https://line.me/R/nv/recommend/@636gbfpe",
-                    external: true
-                });
+            document.getElementById('shareBtn').addEventListener('click', async () => {
+                try {
+                    // 1. 打開 LINE 內建的推薦好友視窗
+                    // 請將 @您的ID 換成您官方帳號的 ID
+                    liff.openWindow({
+                        url: "https://line.me/R/nv/recommend/@636gbfpe",
+                        external: true
+                    });
+
+                    // 2. 自動發送一條訊息回聊天室，作為給您的通知
+                    await liff.sendMessages([{
+                        type: 'text',
+                        text: '📢 我已點擊「推薦給好友」按鈕，支持飛來發車隊！'
+                    }]);
+
+                    // 稍微延遲後關閉視窗
+                    setTimeout(() => { liff.closeWindow(); }, 1000);
+
+                } catch (err) {
+                    console.error(err);
+                    // 如果在電腦版開啟，改用提示
+                    alert("請在手機 LINE 內操作分享功能。");
+                }
             });
         }
         main();
