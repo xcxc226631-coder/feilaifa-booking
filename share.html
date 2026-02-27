@@ -6,45 +6,30 @@
     <title>推薦飛來發</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; text-align: center; padding: 40px 20px; background: #fff; color: #333; }
-        .logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; border: 2px solid #d32f2f; }
-        .title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #d32f2f; }
-        .desc { color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 16px; }
-        .btn-share { background: #00b900; color: white; padding: 18px; border-radius: 35px; text-decoration: none; display: block; font-weight: bold; font-size: 18px; border: none; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(0,185,0,0.3); }
-        .btn-share:active { background: #009000; transform: scale(0.98); }
+        body { font-family: sans-serif; text-align: center; padding: 50px 20px; }
+        .btn { background: #00b900; color: white; padding: 20px; border-radius: 10px; font-weight: bold; font-size: 20px; width: 100%; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
-    <img src="https://xcxc226631-coder.github.io/feilaifa-booking/logo.png" class="logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2099/2099122.png'">
+    <h2>🀄️ 推薦飛來發 🀄️</h2>
+    <p>點擊按鈕分享給 LINE 好友</p>
     
-    <div class="title">🀄️ 推薦飛來發車隊 🀄️</div>
-    <div class="desc">覺得我們的預約服務很方便嗎？<br>點擊按鈕分享名片給好友<br>讓大家一起享受優質接送！</div>
-    
-    <button class="btn-share" id="shareBtn">立即推薦給好友</button>
+    <button class="btn" id="shareBtn">立即推薦給好友</button>
 
     <script>
         async function main() {
             try {
-                // 請填入您的 LIFF ID
+                // 1. 這裡務必填入「推薦飛來發」那個 LIFF 的 ID
                 await liff.init({ liffId: "2009263508-0qU0PuCk" });
 
-                document.getElementById('shareBtn').addEventListener('click', async () => {
-                    // 1. 先嘗試發送通知訊息給官方帳號（讓您知道誰點了分享）
-                    try {
-                        await liff.sendMessages([{
-                            type: 'text',
-                            text: '📢 我已點擊「推薦給好友」按鈕！'
-                        }]);
-                    } catch (e) {
-                        console.log("無法發送通知訊息，可能缺少 chat_message.write 權限，但不影響分享功能。");
-                    }
-
-                    // 2. 直接跳轉到 LINE 內建的推薦好友頁面
-                    // 請將下方 @您的ID 換成您官方帳號的 ID (例如 @123abcd)
-                    window.location.href = "https://line.me/R/nv/recommend/@636gpfpe";
+                document.getElementById('shareBtn').addEventListener('click', () => {
+                    // 2. 這是最穩定的推薦連結，請將 @您的ID 換成您的官方帳號 ID
+                    // 注意：ID 前面一定要有 @，例如 @abc1234
+                    const lineID = "@636gbfpe"; 
+                    window.location.href = "https://line.me/R/nv/recommend/" + lineID;
                 });
             } catch (err) {
-                console.error("LIFF 初始化失敗", err);
+                alert("初始化失敗，請檢查 LIFF ID 是否正確");
             }
         }
         main();
