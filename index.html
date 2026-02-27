@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🀄️飛來發預約</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+body{
+font-family:Arial;
+padding:20px;
+background:#f4f4f4;
+}
+.container{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+h2{
+text-align:center;
+}
+input, textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:16px;
+}
+button{
+width:100%;
+padding:15px;
+background:#009900;
+color:white;
+font-size:18px;
+border:none;
+border-radius:8px;
+}
+button:active{
+background:#007700;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>🀄️飛來發🀄️<br>預約單</h2>
+
+<label>時間</label>
+<input id="time" placeholder="請輸入搭乘時間">
+
+<label>上車地點</label>
+<input id="start" placeholder="請輸入上車地址">
+
+<label>下車地點</label>
+<input id="end" placeholder="請輸入下車地址">
+
+<label>人數</label>
+<input id="people" placeholder="幾位乘客">
+
+<label>備註</label>
+<textarea id="note" placeholder="行李數量 / 是否需要🈲菸🈲檳榔"></textarea>
+
+<button onclick="send()">送出預約</button>
+</div>
+
+<script>
+async function main(){
+await liff.init({ liffId:"LIFF_ID" });
+}
+main();
+
+async function send(){
+
+if(!time.value || !start.value || !end.value){
+alert("請填寫完整資料");
+return;
+}
+
+const text =
+`🀄️飛來發🀄️
+時間：${time.value}
+上車地點：${start.value}
+下車地點：${end.value}
+人數：${people.value}
+備註：${note.value}`;
+
+await liff.sendMessages([
+{ type:"text", text:text }
+]);
+
+alert("預約已送出！");
+liff.closeWindow();
+}
+</script>
+
+</body>
+</html>
