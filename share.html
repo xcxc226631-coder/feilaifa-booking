@@ -12,55 +12,39 @@
         .desc { color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 16px; }
         .btn-share { background: #00b900; color: white; padding: 18px; border-radius: 35px; text-decoration: none; display: block; font-weight: bold; font-size: 18px; border: none; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(0,185,0,0.3); }
         .btn-share:active { background: #009000; transform: scale(0.98); }
-        #status { font-size: 12px; color: #999; margin-top: 15px; }
     </style>
 </head>
 <body>
     <img src="https://xcxc226631-coder.github.io/feilaifa-booking/logo.png" class="logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2099/2099122.png'">
     
     <div class="title">🀄️ 推薦飛來發車隊 🀄️</div>
-    <div class="desc">覺得我們的預約服務很方便嗎？<br>點擊按鈕分享給好友<br>讓大家一起享受優質接送！</div>
+    <div class="desc">覺得我們的預約服務很方便嗎？<br>點擊按鈕分享名片給好友<br>讓大家一起享受優質接送！</div>
     
-    <button class="btn-share" id="shareBtn">立即選擇好友分享</button>
-    <div id="status">系統初始化中...</div>
+    <button class="btn-share" id="shareBtn">立即推薦給好友</button>
 
     <script>
         async function main() {
             try {
-                // 1. 初始化 LIFF (請確認 ID 是否正確)
+                // 請填入您的 LIFF ID
                 await liff.init({ liffId: "2009263508-0qU0PuCk" });
-                document.getElementById('status').innerText = "系統就緒";
 
                 document.getElementById('shareBtn').addEventListener('click', async () => {
-                    // 2. 檢查是否具備分享權限
-                    if (liff.isApiAvailable('shareTargetPicker')) {
-                        try {
-                            // 3. 呼叫官方分享視窗
-                            const result = await liff.shareTargetPicker([
-                                {
-                                    type: "text",
-                                    text: "🀄️ 推薦您優質的「飛來發車隊」\n這家的預約系統超好用，推薦給你！\n點此加入好友：https://line.me/R/ti/p/@636gbfpe"
-                                }
-                            ]);
-
-                            if (result) {
-                                // 4. 分享成功後的通知機制
-                                await liff.sendMessages([{
-                                    type: 'text',
-                                    text: '📢 我已成功推薦「飛來發車隊」給朋友了！'
-                                }]);
-                                alert("分享成功！感謝您的推薦。");
-                                liff.closeWindow();
-                            }
-                        } catch (error) {
-                            alert("分享已被取消或發生錯誤");
-                        }
-                    } else {
-                        alert("目前版本不支援分享功能，請更新 LINE。");
+                    // 1. 先嘗試發送通知訊息給官方帳號（讓您知道誰點了分享）
+                    try {
+                        await liff.sendMessages([{
+                            type: 'text',
+                            text: '📢 我已點擊「推薦給好友」按鈕！'
+                        }]);
+                    } catch (e) {
+                        console.log("無法發送通知訊息，可能缺少 chat_message.write 權限，但不影響分享功能。");
                     }
+
+                    // 2. 直接跳轉到 LINE 內建的推薦好友頁面
+                    // 請將下方 @您的ID 換成您官方帳號的 ID (例如 @123abcd)
+                    window.location.href = "https://line.me/R/nv/recommend/@636gpfpe";
                 });
             } catch (err) {
-                document.getElementById('status').innerText = "初始化失敗";
+                console.error("LIFF 初始化失敗", err);
             }
         }
         main();
