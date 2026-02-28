@@ -44,9 +44,17 @@
 
 <script>
     async function main() {
-        try {
-            // 1. 初始化 LIFF (確保 ID 正確)
-            await liff.init({ liffId: "2009263508-0qU0PuCk" });
+    try {
+        await liff.init({ liffId: "2009263508-0qU0PuCk" });
+        alert("LIFF 初始化成功！"); // 加入這行測試
+        
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            // ... 後面的代碼不變
+        });
+    } catch (err) {
+        alert("啟動失敗原因: " + err.message); // 加入這行抓錯誤訊息
+    }
+}
 
             document.getElementById('shareBtn').addEventListener('click', () => {
                 // 2. 這是官方推薦好友的 URL Scheme，不需任何 Scopes 權限
