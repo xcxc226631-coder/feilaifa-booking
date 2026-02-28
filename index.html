@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>飛來發線上預約</title>
-    <script src="https://static.line-scdn.net"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
         .form-group { margin-bottom: 15px; }
@@ -85,7 +85,7 @@
         }
 
         async function main() {
-            // 已填入您的 LIFF ID
+            // 【重要】請務必填入您的 LIFF ID
             await liff.init({ liffId: "2009263508-NTuggdp5" });
 
             document.getElementById('submitBtn').addEventListener('click', async () => {
@@ -106,26 +106,16 @@
                     return;
                 }
 
-                // 組合詳細預約單文字
-                const detailMsg = `🀄️飛來發預約單🀄️\n時間：${finalTime}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${note}`;
+                const msg = `🀄️飛來發預約單🀄️\n時間：${finalTime}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${note}`;
 
                 try {
-                    // 同時發送兩則訊息
-                    // 第一則：固定文字，用來觸發 LINE 後台的關鍵字自動回應
-                    // 第二則：實際的預約單內容
-                    await liff.sendMessages([
-                        {
-                            type: 'text',
-                            text: '我要叫車'
-                        },
-                        {
-                            type: 'text',
-                            text: detailMsg
-                        }
-                    ]);
+                    await liff.sendMessages([{
+                        type: 'text',
+                        text: msg
+                    }]);
                     liff.closeWindow(); 
                 } catch (err) {
-                    alert("傳送失敗，請確認是否在 LINE 開啟並授權 chat_message.write 權限");
+                    alert("傳送失敗，請確認是否在 LINE 開啟");
                 }
             });
         }
