@@ -4,34 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>推薦飛來發</title>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- 引入最新版 LIFF SDK -->
+    <script src="https://static.line-scdn.net"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px 20px; }
-        .btn { background: #00b900; color: white; padding: 20px; border-radius: 10px; font-weight: bold; font-size: 20px; width: 100%; border: none; cursor: pointer; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            text-align: center; 
+            padding: 50px 20px; 
+            background-color: #f8f9fa;
+        }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #333; margin-bottom: 10px; }
+        p { color: #666; margin-bottom: 30px; }
+        .btn { 
+            background: #06C755; /* LINE 官方綠色 */
+            color: white; 
+            padding: 16px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            font-size: 18px; 
+            width: 100%; 
+            border: none; 
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:active { background: #05a346; }
+        .loading { display: none; color: #999; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h2>🀄️ 推薦飛來發 🀄️</h2>
-    <p>點擊按鈕分享給 LINE 好友</p>
-    
-    <button class="btn" id="shareBtn">立即推薦給好友</button>
+    <div class="container">
+        <h2>🀄️ 推薦飛來發 🀄️</h2>
+        <p>將我們的服務分享給您的 LINE 好友</p>
+        
+        <button class="btn" id="shareBtn">立即推薦給好友</button>
+        <div id="status" class="loading">初始化中...</div>
+    </div>
 
     <script>
+        const LIFF_ID = "2009263508-0qU0PuCk"; // 您的 LIFF ID
+        const LINE_ID = "@636gbfpe";          // 您的機器人 ID
+
         async function main() {
+            const statusLabel = document.getElementById('status');
             try {
-                // 1. 這裡務必填入「推薦飛來發」那個 LIFF 的 ID
-                await liff.init({ liffId: "2009263508-0qU0PuCk" });
+                // 1. 初始化 LIFF
+                await liff.init({ liffId: LIFF_ID });
+
+                // 2. 判斷是否已登入（如果是從 LINE 開啟通常會自動登入）
+                if (!liff.isLoggedIn()) {
+                    // 如果在一般瀏覽器開啟，引導登入
+                    // liff.login(); 
+                }
 
                 document.getElementById('shareBtn').addEventListener('click', () => {
-                    // 2. 這是最穩定的推薦連結，請將 @您的ID 換成您的官方帳號 ID
-                    // 注意：ID 前面一定要有 @，例如 @abc1234
-                    const lineID = "@636gbfpe"; 
-                    window.location.href = "https://line.me/R/nv/recommend/" + lineID;
+                    const recommendUrl = `https://line.me{LINE_ID}`;
+                    
+                    // 3. 使用 liff.openWindow 優化跳轉
+                    // 這種方式在 LINE 內部相容性最高，較不會觸發 400 錯誤
+                    if (liff.isInClient()) {
+                        liff.openWindow({
+                            url: recommendUrl,
+                            external: true // 使用外部瀏覽器或 LINE 內建功能開啟
+                        });
+                    } else {
+                        // 如果是在電腦版或一般瀏覽器
+                        window.location.href = recommendUrl;
+                    }
                 });
+
             } catch (err) {
-                alert("初始化失敗，請檢查 LIFF ID 是否正確");
+                console.error(err);
+                alert("啟動失敗: " + err.message);
             }
         }
+
         main();
     </script>
 </body>
