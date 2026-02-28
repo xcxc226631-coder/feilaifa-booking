@@ -3,72 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>分享飛來發</title>
+    <title>推薦飛來發</title>
+    <!-- 引入 LINE 官方 SDK -->
     <script src="https://static.line-scdn.net"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
-        .share-card { background: white; padding: 40px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; width: 85%; }
-        .icon { width: 80px; height: 80px; background: #06C755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; }
-        h2 { margin: 0 0 10px; color: #1a1a1a; }
-        p { color: #666; margin-bottom: 30px; }
-        .btn-share { background: #06C755; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        .btn-share:active { transform: scale(0.98); background: #05a346; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; background-color: #f4f7f6;
+        }
+        .share-card { 
+            background: white; padding: 40px 24px; border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; 
+            width: 80%; max-width: 320px;
+        }
+        .icon-circle { 
+            width: 80px; height: 80px; background: #06C755; color: white; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 20px; font-size: 40px; box-shadow: 0 4px 10px rgba(6,199,85,0.3);
+        }
+        h2 { margin: 0 0 12px; font-size: 24px; color: #111; }
+        p { color: #777; font-size: 15px; margin-bottom: 32px; line-height: 1.6; }
+        .btn-share { 
+            background: #06C755; color: white; border: none; padding: 16px; 
+            border-radius: 50px; font-size: 18px; font-weight: bold; 
+            cursor: pointer; width: 100%; transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(6,199,85,0.2);
+        }
+        .btn-share:active { background: #05a346; transform: scale(0.97); }
     </style>
 </head>
 <body>
 
 <div class="share-card">
-    <div class="icon">🀄️</div>
-    <h2>推薦飛來發</h2>
-    <p>點擊下方按鈕分享給好友</p>
-    <button class="btn-share" id="mainShareBtn">選擇分享對象</button>
+    <div class="icon-circle">🀄️</div>
+    <h2>推薦給好友</h2>
+    <p>覺得服務不錯嗎？<br>點擊下方按鈕推薦給 LINE 好友</p>
+    <button class="btn-share" id="shareBtn">立即選擇好友</button>
 </div>
 
 <script>
     async function main() {
         try {
+            // 1. 初始化 LIFF (確保 ID 正確)
             await liff.init({ liffId: "2009263508-0qU0PuCk" });
 
-            if (!liff.isLoggedIn() && !liff.isInClient()) {
-                liff.login();
-            }
-
-            document.getElementById('mainShareBtn').addEventListener('click', async () => {
-                if (!liff.isApiAvailable('shareTargetPicker')) {
-                    alert("請先在 LINE Developers 後台開啟 shareTargetPicker 權限");
-                    return;
-                }
-
-                // 這裡定義分享出去的訊息內容 (Flex Message 格式)
-                const result = await liff.shareTargetPicker(
-                          },
-                          "footer": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [
-                              {
-                                "type": "button",
-                                "action": {
-                                  "type": "uri",
-                                  "label": "立即預約 / 加入好友",
-                                  "uri": "https://line.me"
-                                },
-                                "style": "primary",
-                                "color": "#06C755"
-                              }
-                            ]
-                          }
-                        }
-                    }
-                ]);
-
-                if (result) {
-                    // 分享成功後自動關閉視窗
-                    liff.closeWindow();
+            document.getElementById('shareBtn').addEventListener('click', () => {
+                // 2. 這是官方推薦好友的 URL Scheme，不需任何 Scopes 權限
+                const lineID = "@636gbfpe"; 
+                const recommendUrl = `https://line.me{lineID}`;
+                
+                if (liff.isInClient()) {
+                    // 在 LINE 內部開啟：觸發原生分享清單
+                    liff.openWindow({
+                        url: recommendUrl,
+                        external: true 
+                    });
+                    // 點擊後 0.5 秒自動關閉網頁，達成絲滑跳轉效果
+                    setTimeout(() => { liff.closeWindow(); }, 500);
+                } else {
+                    // 在外部瀏覽器開啟：直接跳轉
+                    window.location.href = recommendUrl;
                 }
             });
         } catch (err) {
-            console.error(err);
+            console.error("初始化失敗", err);
         }
     }
     main();
