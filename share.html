@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>推薦飛來發</title>
-    <!-- 引入正確的 LINE SDK -->
     <script src="https://static.line-scdn.net"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
         .share-card { background: white; padding: 40px 24px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; width: 80%; max-width: 320px; }
         .icon-circle { width: 80px; height: 80px; background: #06C755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; }
         .btn-share { background: #06C755; color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -22,22 +21,29 @@
     </div>
 
     <script>
-        async function main() {
+        // 核心邏輯：確保初始化成功後才執行點擊事件
+        async function initializeLiff() {
             try {
-                await liff.init({ liffId: "2009263508-0qU0PuCk" }); // 確保您的 LIFF ID 正確
-                document.getElementById('shareBtn').addEventListener('click', () => {
-                    const lineID = "@636gbfpe"; 
-                    const recommendUrl = "https://line.me" + lineID;
+                await liff.init({ liffId: "2009263508-0qU0PuCk" });
+                
+                // 初始化成功後，幫按鈕裝上功能
+                document.getElementById('shareBtn').onclick = function() {
+                    const recommendUrl = "https://line.me";
+                    
                     if (liff.isInClient()) {
                         liff.openWindow({ url: recommendUrl, external: true });
                         setTimeout(() => { liff.closeWindow(); }, 500);
                     } else {
                         window.location.href = recommendUrl;
                     }
-                });
-            } catch (err) { console.error(err); }
+                };
+            } catch (err) {
+                alert("錯誤：" + err.message);
+            }
         }
-        main();
+
+        // 啟動！
+        initializeLiff();
     </script>
 </body>
 </html>
