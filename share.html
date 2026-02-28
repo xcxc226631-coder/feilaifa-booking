@@ -41,45 +41,44 @@
         <div id="status" class="loading">初始化中...</div>
     </div>
 
-    <script>
-        const LIFF_ID = "2009263508-0qU0PuCk"; // 您的 LIFF ID
-        const LINE_ID = "@636gbfpe";          // 您的機器人 ID
-
-        async function main() {
-            const statusLabel = document.getElementById('status');
-            try {
-                // 1. 初始化 LIFF
-                await liff.init({ liffId: LIFF_ID });
-
-                // 2. 判斷是否已登入（如果是從 LINE 開啟通常會自動登入）
-                if (!liff.isLoggedIn()) {
-                    // 如果在一般瀏覽器開啟，引導登入
-                    // liff.login(); 
-                }
-
-                document.getElementById('shareBtn').addEventListener('click', () => {
-                    const recommendUrl = `https://line.me{LINE_ID}`;
-                    
-                    // 3. 使用 liff.openWindow 優化跳轉
-                    // 這種方式在 LINE 內部相容性最高，較不會觸發 400 錯誤
-                    if (liff.isInClient()) {
-                        liff.openWindow({
-                            url: recommendUrl,
-                            external: true // 使用外部瀏覽器或 LINE 內建功能開啟
-                        });
-                    } else {
-                        // 如果是在電腦版或一般瀏覽器
-                        window.location.href = recommendUrl;
-                    }
-                });
-
-            } catch (err) {
-                console.error(err);
-                alert("啟動失敗: " + err.message);
-            }
+   <script>
+    async function main() {
+        const statusLabel = document.getElementById('status');
+        
+        // 檢查 LIFF SDK 是否載入成功
+        if (typeof liff === 'undefined') {
+            alert("LIFF SDK 載入失敗，請檢查網路連線或重新整理");
+            return;
         }
 
+        try {
+            // 初始化 LIFF
+            await liff.init({ liffId: "2009263508-0qU0PuCk" });
+
+            document.getElementById('shareBtn').addEventListener('click', () => {
+                const lineID = "@636gbfpe"; 
+                const recommendUrl = "https://line.me" + lineID;
+                
+                if (liff.isInClient()) {
+                    liff.openWindow({
+                        url: recommendUrl,
+                        external: true 
+                    });
+                } else {
+                    window.location.href = recommendUrl;
+                }
+            });
+        } catch (err) {
+            console.error(err);
+            alert("初始化失敗: " + err.message);
+        }
+    }
+
+    // 確保網頁內容載入完畢後再執行 main
+    window.onload = function() {
         main();
-    </script>
+    };
+</script>
+    
 </body>
 </html>
