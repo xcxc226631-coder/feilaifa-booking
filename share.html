@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>推薦飛來發</title>
-    <!-- 引入 LINE 官方 SDK -->
+    <!-- 1. 修正：引入正確且完整的 SDK 網址 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { 
@@ -44,40 +44,33 @@
 
 <script>
     async function main() {
-    try {
-        await liff.init({ liffId: "2009263508-0qU0PuCk" });
-        alert("LIFF 初始化成功！"); // 加入這行測試
-        
-        document.getElementById('shareBtn').addEventListener('click', () => {
-            // ... 後面的代碼不變
-        });
-    } catch (err) {
-        alert("啟動失敗原因: " + err.message); // 加入這行抓錯誤訊息
-    }
-}
+        try {
+            // 2. 初始化 LIFF
+            await liff.init({ liffId: "2009263508-0qU0PuCk" });
+            console.log("LIFF 初始化成功");
 
+            // 3. 綁定點擊事件
             document.getElementById('shareBtn').addEventListener('click', () => {
-                // 2. 這是官方推薦好友的 URL Scheme，不需任何 Scopes 權限
                 const lineID = "@636gbfpe"; 
-                const recommendUrl = `https://line.me{lineID}`;
+                // 4. 修正：推薦好友的完整網址格式
+                const recommendUrl = "https://line.me" + lineID;
                 
                 if (liff.isInClient()) {
-                    // 在 LINE 內部開啟：觸發原生分享清單
                     liff.openWindow({
                         url: recommendUrl,
                         external: true 
                     });
-                    // 點擊後 0.5 秒自動關閉網頁，達成絲滑跳轉效果
                     setTimeout(() => { liff.closeWindow(); }, 500);
                 } else {
-                    // 在外部瀏覽器開啟：直接跳轉
                     window.location.href = recommendUrl;
                 }
             });
         } catch (err) {
-            console.error("初始化失敗", err);
+            alert("啟動失敗原因: " + err.message);
         }
     }
+    
+    // 執行主程式
     main();
 </script>
 
