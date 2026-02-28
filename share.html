@@ -3,82 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>推薦飛來發</title>
-    <!-- 引入最新版 LIFF SDK -->
+    <title>分享飛來發</title>
     <script src="https://static.line-scdn.net"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            text-align: center; 
-            padding: 50px 20px; 
-            background-color: #f8f9fa;
-        }
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #333; margin-bottom: 10px; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
+        .share-card { background: white; padding: 40px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; width: 85%; }
+        .icon { width: 80px; height: 80px; background: #06C755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; }
+        h2 { margin: 0 0 10px; color: #1a1a1a; }
         p { color: #666; margin-bottom: 30px; }
-        .btn { 
-            background: #06C755; /* LINE 官方綠色 */
-            color: white; 
-            padding: 16px; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            font-size: 18px; 
-            width: 100%; 
-            border: none; 
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .btn:active { background: #05a346; }
-        .loading { display: none; color: #999; margin-top: 10px; }
+        .btn-share { background: #06C755; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-share:active { transform: scale(0.98); background: #05a346; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🀄️ 推薦飛來發 🀄️</h2>
-        <p>將我們的服務分享給您的 LINE 好友</p>
-        
-        <button class="btn" id="shareBtn">立即推薦給好友</button>
-        <div id="status" class="loading">初始化中...</div>
-    </div>
 
-   <script>
+<div class="share-card">
+    <div class="icon">🀄️</div>
+    <h2>推薦飛來發</h2>
+    <p>點擊下方按鈕分享給好友</p>
+    <button class="btn-share" id="mainShareBtn">選擇分享對象</button>
+</div>
+
+<script>
     async function main() {
-        const statusLabel = document.getElementById('status');
-        
-        // 檢查 LIFF SDK 是否載入成功
-        if (typeof liff === 'undefined') {
-            alert("LIFF SDK 載入失敗，請檢查網路連線或重新整理");
-            return;
-        }
-
         try {
-            // 初始化 LIFF
             await liff.init({ liffId: "2009263508-0qU0PuCk" });
 
-            document.getElementById('shareBtn').addEventListener('click', () => {
-                const lineID = "@636gbfpe"; 
-                const recommendUrl = "https://line.me" + lineID;
-                
-                if (liff.isInClient()) {
-                    liff.openWindow({
-                        url: recommendUrl,
-                        external: true 
-                    });
-                } else {
-                    window.location.href = recommendUrl;
+            if (!liff.isLoggedIn() && !liff.isInClient()) {
+                liff.login();
+            }
+
+            document.getElementById('mainShareBtn').addEventListener('click', async () => {
+                if (!liff.isApiAvailable('shareTargetPicker')) {
+                    alert("請先在 LINE Developers 後台開啟 shareTargetPicker 權限");
+                    return;
+                }
+
+                // 這裡定義分享出去的訊息內容 (Flex Message 格式)
+                const result = await liff.shareTargetPicker(
+                          },
+                          "footer": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                              {
+                                "type": "button",
+                                "action": {
+                                  "type": "uri",
+                                  "label": "立即預約 / 加入好友",
+                                  "uri": "https://line.me"
+                                },
+                                "style": "primary",
+                                "color": "#06C755"
+                              }
+                            ]
+                          }
+                        }
+                    }
+                ]);
+
+                if (result) {
+                    // 分享成功後自動關閉視窗
+                    liff.closeWindow();
                 }
             });
         } catch (err) {
             console.error(err);
-            alert("初始化失敗: " + err.message);
         }
     }
-
-    // 確保網頁內容載入完畢後再執行 main
-    window.onload = function() {
-        main();
-    };
+    main();
 </script>
-    
+
 </body>
 </html>
