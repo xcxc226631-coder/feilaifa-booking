@@ -4,60 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>推薦飛來發</title>
-    <!-- 1. 這裡最關鍵：網址必須包含 /liff/edge/2/sdk.js -->
+    <!-- 引入正確的 LINE SDK -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
         .share-card { background: white; padding: 40px 24px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; width: 80%; max-width: 320px; }
         .icon-circle { width: 80px; height: 80px; background: #06C755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; }
-        h2 { margin: 0 0 12px; font-size: 24px; color: #111; }
-        p { color: #777; font-size: 15px; margin-bottom: 32px; line-height: 1.6; }
-        .btn-share { background: #06C755; color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s ease; }
-        .btn-share:active { background: #05a346; transform: scale(0.97); }
+        .btn-share { background: #06C755; color: white; border: none; padding: 16px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
+    <div class="share-card">
+        <div class="icon-circle">🀄️</div>
+        <h2>推薦給好友</h2>
+        <p>點擊下方按鈕推薦給 LINE 好友</p>
+        <button class="btn-share" id="shareBtn">立即選擇好友</button>
+    </div>
 
-<div class="share-card">
-    <div class="icon-circle">🀄️</div>
-    <h2>推薦給好友</h2>
-    <p>覺得服務不錯嗎？<br>點擊下方按鈕推薦給 LINE 好友</p>
-    <button class="btn-share" id="shareBtn">立即選擇好友</button>
-</div>
-
-<script>
-    async function main() {
-        // 檢查 liff 是否載入成功
-        if (typeof liff === 'undefined') {
-            alert("載入失敗：請確認網路連線或重新整理頁面");
-            return;
+    <script>
+        async function main() {
+            try {
+                await liff.init({ liffId: "2009263508-0qU0PuCk" }); // 確保您的 LIFF ID 正確
+                document.getElementById('shareBtn').addEventListener('click', () => {
+                    const lineID = "@636gbfpe"; 
+                    const recommendUrl = "https://line.me" + lineID;
+                    if (liff.isInClient()) {
+                        liff.openWindow({ url: recommendUrl, external: true });
+                        setTimeout(() => { liff.closeWindow(); }, 500);
+                    } else {
+                        window.location.href = recommendUrl;
+                    }
+                });
+            } catch (err) { console.error(err); }
         }
-
-        try {
-            // 2. 初始化 (確認 ID 是 2009263508-0qU0PuCk)
-            await liff.init({ liffId: "2009263508-0qU0PuCk" });
-
-            document.getElementById('shareBtn').addEventListener('click', () => {
-                const lineID = "@636gbfpe"; 
-                const recommendUrl = "https://line.me" + lineID;
-                
-                if (liff.isInClient()) {
-                    liff.openWindow({ url: recommendUrl, external: true });
-                    setTimeout(() => { liff.closeWindow(); }, 500);
-                } else {
-                    window.location.href = recommendUrl;
-                }
-            });
-        } catch (err) {
-            alert("初始化錯誤: " + err.message);
-        }
-    }
-
-    // 確保全部資源載入完畢後再啟動
-    window.onload = function() {
         main();
-    };
-</script>
-
+    </script>
 </body>
 </html>
