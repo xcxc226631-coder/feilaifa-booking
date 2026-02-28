@@ -108,15 +108,25 @@
 
                 const msg = `🀄️飛來發預約單🀄️\n時間：${finalTime}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${note}`;
 
-                try {
-                    await liff.sendMessages([{
-                        type: 'text',
-                        text: msg
-                    }]);
+                               try {
+                    // 同時放入兩個訊息物件，LINE 會按順序發送
+                    await liff.sendMessages([
+                        {
+                            type: 'text',
+                            text: '我要叫車'
+                        },
+                        {
+                            type: 'text',
+                            text: msg
+                        }
+                    ]);
+                    // 發送成功後關閉視窗
                     liff.closeWindow(); 
                 } catch (err) {
-                    alert("傳送失敗，請確認是否在 LINE 開啟");
+                    // 加入 err 顯示具體錯誤，方便調試
+                    alert("傳送失敗：" + err.message + "\n請確認是否有勾選 chat_message.write 權限");
                 }
+
             });
         }
         main();
