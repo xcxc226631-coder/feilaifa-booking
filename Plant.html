@@ -128,12 +128,11 @@
                   `行李：${luggage}`;
 
     try {
-        // 核心修正處
-        await liff.sendMessages();
-        liff.closeWindow();
-    } catch (err) {
-        alert("發送失敗：" + err.message + "\n請確認是否已授權「傳送訊息」權限。");
-    }
+    await liff.sendMessages();
+    liff.closeWindow();
+} catch (err) {
+    // 如果跳出 "User has not granted permission"，就是第一步跟第二步沒做好
+    alert("❌ 錯誤原因：" + err.message + "\n請確保已在 LINE 設定中允許「傳送訊息」權限。");
 }
     </script>
 </body>
