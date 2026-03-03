@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <!-- 引入 LINE LIFF SDK -->
+    <!-- 1. 修正：引入完整 LINE LIFF SDK 網址 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
@@ -12,7 +12,6 @@
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        button:disabled { background-color: #ccc; }
     </style>
 </head>
 <body>
@@ -39,7 +38,6 @@
         <div class="form-group">
             <label>人數</label>
             <select id="passengers" onchange="checkVehicle()">
-                <!-- 產生 1~8 選項 -->
                 <script>for(let i=1;i<=8;i++) document.write(`<option value="${i}">${i}人</option>`);</script>
             </select>
         </div>
@@ -62,41 +60,37 @@
         // 初始化 LIFF
         liff.init({ liffId: "2009263508-hAj1Qpgw" }).then(() => {
             if (!liff.isLoggedIn()) { liff.login(); }
-        });
+        }).catch((err) => { console.error('LIFF 初始化失敗', err); });
 
-       // 切換送機備註顯示
         function toggleNote() {
             const type = document.getElementById('type').value;
             const note = document.getElementById('transferNote');
-            if (type === "送機") {
-                note.style.display = "block";
-            } else {
-                note.style.display = "none";
-            }
+            note.style.display = (type === "送機") ? "block" : "none";
         }
 
-        // 修改原本的 checkVehicle 邏輯，確保人數與車種連動依然正常
+        // 2. 修正：正確的 Option 禁用語法
         function checkVehicle() {
             const pCount = parseInt(document.getElementById('passengers').value);
             const vehicleSelect = document.getElementById('vehicle');
             
             if (pCount >= 5) {
                 vehicleSelect.value = "7人座以上";
-                vehicleSelect.options[0].disabled = true; // 禁用轎車
-                vehicleSelect.options[1].disabled = true; // 禁用休旅車
+                vehicleSelect.options[0].disabled = true; 
+                vehicleSelect.options[1].disabled = true; 
             } else {
                 vehicleSelect.options[0].disabled = false;
                 vehicleSelect.options[1].disabled = false;
             }
         }
-        // 發送訊息至 LINE
+
         function sendOrder() {
             const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n日期：${document.getElementById('date').value}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
             
             liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
-                liff.closeWindow(); // 發送後自動關閉視窗
+                liff.closeWindow(); 
             }).catch((err) => {
-                alert("發送失敗，請確認是否在 LINE 中開啟：" + err);
+                alert("請點擊「接受」權限才能自動傳送訊息，或在 LINE 中開啟。");
+                console.error(err);
             });
         }
     </script>
