@@ -114,12 +114,12 @@
                           `行李：${luggage}`;
 
             try {
-                // 核心修正：加入陣列與物件參數
-                await liff.sendMessages();
-                liff.closeWindow();
-            } catch (err) {
-                alert("❌ 錯誤原因：" + err.message + "\n請確保已在 LINE Developers 後台勾選 chat_message.write 權限。");
-            }
+    // 必須有這個陣列物件參數
+    await liff.sendMessages();
+    liff.closeWindow();
+} catch (err) {
+    alert("發送失敗：" + err.message);
+}
         } // 這裡補上了漏掉的 }
     </script>
 </body>
