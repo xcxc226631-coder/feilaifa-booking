@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機場接送預約單</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background-color: #00b900; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>機場接送預約</h2>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label>服務類別</label>
+            <select id="type"><option>接機</option><option>送機</option></select>
+        </div>
+        <div class="form-group">
+            <label>預約日期</label>
+            <input type="date" id="date" required>
+        </div>
+        <div class="form-group">
+            <label>航班資訊</label>
+            <input type="text" id="flight" placeholder="例如：BR191" required>
+        </div>
+        <div class="form-group">
+            <label>乘車人數</label>
+            <select id="passengers" onchange="checkVehicle()">
+                <option value="1">1人</option><option value="2">2人</option><option value="3">3人</option>
+                <option value="4">4人</option><option value="5">5人</option><option value="6">6人</option>
+                <option value="7">7人</option><option value="8">8人</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>車種選擇</label>
+            <select id="vehicle">
+                <option value="轎車">轎車 (限4人內)</option>
+                <option value="休旅車">休旅車 (限4人內)</option>
+                <option value="7人座以上">7人座以上</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>行李數量/大小</label>
+            <input type="text" id="luggage" placeholder="例如：28吋*2 (無則填無)">
+        </div>
+        <button type="button" onclick="submitToLine()">確認送出 (傳送至LINE)</button>
+    </form>
+
+    <script>
+        function checkVehicle() {
+            const pCount = document.getElementById('passengers').value;
+            const vehicleSelect = document.getElementById('vehicle');
+            
+            if (pCount >= 5) {
+                // 如果人數 5 人以上，強制選擇 7 人座並禁用其他選項
+                vehicleSelect.value = "7人座以上";
+                vehicleSelect.options[0].disabled = true; // 禁用轎車
+                vehicleSelect.options[1].disabled = true; // 禁用休旅車
+            } else {
+                vehicleSelect.options[0].disabled = false;
+                vehicleSelect.options[1].disabled = false;
+            }
+        }
+
+        function submitToLine() {
+            // 這裡可以串接 LINE LIFF 或直接產出文字讓使用者複製
+            const msg = `【預約單】\n類別：${document.getElementById('type').value}\n日期：${document.getElementById('date').value}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
+            alert("預約資訊已生成，請複製並傳送給客服：\n\n" + msg);
+        }
+    </script>
+</body>
+</html>
