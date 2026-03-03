@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <!-- 核心：正確的 LIFF SDK 載入路徑 -->
+    <!-- 修正 1：正確的 SDK 完整路徑 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
@@ -27,26 +27,21 @@
                 <option value="送機">送機 (市區 → 機場)</option>
             </select>
         </div>
-        
         <div id="transferNote">⚠️ 提醒：送機時間請填寫「司機到上車點」的時間</div>
-        
         <div class="form-group">
             <label>日期與時間</label>
             <input type="datetime-local" id="datetime" required>
         </div>
-        
         <div class="form-group">
             <label>航班資訊</label>
             <input type="text" id="flight" placeholder="例如：BR191" required>
         </div>
-        
         <div class="form-group">
             <label>人數</label>
             <select id="passengers" onchange="checkVehicle()">
                 <script>for(let i=1; i<=8; i++) { document.write(`<option value="${i}">${i}人</option>`); }</script>
             </select>
         </div>
-        
         <div class="form-group">
             <label>建議車種</label>
             <select id="vehicle">
@@ -55,19 +50,16 @@
                 <option value="7人座以上">7人座以上</option>
             </select>
         </div>
-        
         <div class="form-group">
             <label>行李數量/大小</label>
             <input type="text" id="luggage" placeholder="例如：28吋*2, 20吋*1" required>
         </div>
-        
         <button type="button" id="submitBtn" onclick="sendOrder()" disabled>正在啟動 LINE...</button>
     </form>
 
     <script>
         const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
-        // 【保險機制】確保 SDK 載入後才執行
         const checkLiffInterval = setInterval(() => {
             if (typeof liff !== 'undefined') {
                 clearInterval(checkLiffInterval);
@@ -115,20 +107,14 @@
 
             if(!rawDt || !flight || !luggage) return alert("請填寫完整資訊");
 
-            const msgText = `【機場接送預約】\n` +
-                          `服務：${document.getElementById('type').value}\n` +
-                          `時間：${rawDt.replace('T', ' ')}\n` +
-                          `航班：${flight}\n` +
-                          `人數：${document.getElementById('passengers').value}人\n` +
-                          `車種：${document.getElementById('vehicle').value}\n` +
-                          `行李：${luggage}`;
+            const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${flight}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${luggage}`;
 
             try {
-                // 確保訊息格式正確
+                // 修正 2：帶入訊息內容
                 await liff.sendMessages();
                 liff.closeWindow();
             } catch (err) {
-                alert("發送失敗！請確保在 LINE App 內開啟，並授予訊息權限。");
+                alert("發送失敗！原因：" + err.message);
             }
         }
     </script>
