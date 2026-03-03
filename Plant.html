@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <!-- 修正 1：正確的 SDK 完整路徑 -->
-    <script src="https://static.line-scdn.net"></script>
+    <!-- 更換為更穩定的 CDN 來源 -->
+    <script src="https://cdn.jsdelivr.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
         h3 { text-align: center; margin-bottom: 20px; }
@@ -60,16 +60,23 @@
     <script>
         const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
-        const checkLiffInterval = setInterval(() => {
-            if (typeof liff !== 'undefined') {
-                clearInterval(checkLiffInterval);
-                initializeLiff();
+        // 偵錯輔助：如果 5 秒後還沒啟動，彈出視窗
+        const debugTimer = setTimeout(() => {
+            if (document.getElementById('submitBtn').disabled) {
+                alert("❌ SDK 載入超時！請嘗試點擊右上角「...」並選擇「重新整理」");
             }
-        }, 100);
+        }, 5000);
 
-        async function initializeLiff() {
+        async function init() {
             try {
+                // 確保 liff 變數存在
+                if (typeof liff === 'undefined') {
+                    throw new Error("找不到 liff 變數，請確認 SDK 載入路徑");
+                }
+                
                 await liff.init({ liffId: LIFF_ID });
+                clearTimeout(debugTimer);
+
                 if (!liff.isLoggedIn()) {
                     liff.login();
                 } else {
@@ -78,9 +85,12 @@
                     btn.innerText = "確認送出預約";
                 }
             } catch (err) {
-                alert("❌ LIFF 初始化失敗：" + err.message);
+                alert("❌ LIFF 啟動失敗：" + err.message);
             }
         }
+
+        // 網頁載入後執行
+        window.onload = init;
 
         function toggleNote() {
             const type = document.getElementById('type').value;
@@ -110,7 +120,6 @@
             const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${flight}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${luggage}`;
 
             try {
-                // 修正 2：帶入訊息內容
                 await liff.sendMessages();
                 liff.closeWindow();
             } catch (err) {
