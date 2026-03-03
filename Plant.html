@@ -110,26 +110,29 @@
         }
 
         async function sendOrder() {
+    const type = document.getElementById('type').value;
     const rawDt = document.getElementById('datetime').value;
     const flight = document.getElementById('flight').value;
+    const passengers = document.getElementById('passengers').value;
+    const vehicle = document.getElementById('vehicle').value;
     const luggage = document.getElementById('luggage').value;
 
-    if(!rawDt || !flight || !luggage) return alert("請填寫完整資訊");
+    if(!rawDt || !flight || !luggage) return alert("請填寫完整預約資訊");
 
     const msgText = `【機場接送預約】\n` +
-                  `服務：${document.getElementById('type').value}\n` +
+                  `服務：${type}\n` +
                   `時間：${rawDt.replace('T', ' ')}\n` +
                   `航班：${flight}\n` +
-                  `人數：${document.getElementById('passengers').value}人\n` +
-                  `車種：${document.getElementById('vehicle').value}\n` +
+                  `人數：${passengers}人\n` +
+                  `車種：${vehicle}\n` +
                   `行李：${luggage}`;
 
     try {
-        // 這裡就是你剛才看到的那個位置，現在加上參數了
+        // 核心修正處
         await liff.sendMessages();
-        liff.closeWindow(); // 發送成功後關閉視窗
+        liff.closeWindow();
     } catch (err) {
-        alert("發送失敗！錯誤原因：" + err.message);
+        alert("發送失敗：" + err.message + "\n請確認是否已授權「傳送訊息」權限。");
     }
 }
     </script>
