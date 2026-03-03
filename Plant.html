@@ -79,6 +79,7 @@
         }
 
        async function sendOrder() {
+    // 1. 取得所有欄位數值
     const type = document.getElementById('type').value;
     const rawDt = document.getElementById('datetime').value;
     const flight = document.getElementById('flight').value;
@@ -86,9 +87,12 @@
     const vehicle = document.getElementById('vehicle').value;
     const luggage = document.getElementById('luggage').value;
 
-    // 防呆驗證
-    if(!rawDt || !flight || !luggage) return alert("請填寫完整預約資訊");
+    // 2. 防呆驗證：確保必填欄位不為空
+    if(!rawDt || !flight || !luggage) {
+        return alert("請填寫完整預約資訊");
+    }
 
+    // 3. 組裝訊息文字
     const msgText = `【機場接送預約】\n` +
                   `服務：${type}\n` +
                   `時間：${rawDt.replace('T', ' ')}\n` +
@@ -98,14 +102,20 @@
                   `行李：${luggage}`;
 
     try {
-        // 修正處：務必傳入符合格式的陣列物件
+        // 4. 【核心修正】嚴格遵守陣列物件格式
+        // 注意：這裡必須是
         await liff.sendMessages();
-        liff.closeWindow(); // 傳送成功後關閉
+        
+        // 5. 成功後自動關閉視窗
+        liff.closeWindow();
+        
     } catch (err) {
-        // 這裡會跳出具體的錯誤代碼，如果是 "User has not granted permission" 就是後台沒勾好
-        alert("❌ 錯誤原因：" + err.message);
+        // 如果報錯，彈出具體原因
+        alert("❌ 傳送失敗原因：\n" + err.message);
+        console.error("LIFF sendMessages Error:", err);
     }
-} // <--- 補上這個漏掉的結束括號
+}
+
     </script>
 </body>
 </html>
