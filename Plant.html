@@ -64,7 +64,18 @@
             if (!liff.isLoggedIn()) { liff.login(); }
         });
 
-        // 人數與車種連動邏輯
+       // 切換送機備註顯示
+        function toggleNote() {
+            const type = document.getElementById('type').value;
+            const note = document.getElementById('transferNote');
+            if (type === "送機") {
+                note.style.display = "block";
+            } else {
+                note.style.display = "none";
+            }
+        }
+
+        // 修改原本的 checkVehicle 邏輯，確保人數與車種連動依然正常
         function checkVehicle() {
             const pCount = parseInt(document.getElementById('passengers').value);
             const vehicleSelect = document.getElementById('vehicle');
@@ -78,7 +89,6 @@
                 vehicleSelect.options[1].disabled = false;
             }
         }
-
         // 發送訊息至 LINE
         function sendOrder() {
             const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n日期：${document.getElementById('date').value}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
