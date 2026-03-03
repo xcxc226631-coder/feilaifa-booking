@@ -110,21 +110,28 @@
         }
 
         async function sendOrder() {
-            const rawDt = document.getElementById('datetime').value;
-            const flight = document.getElementById('flight').value;
-            const luggage = document.getElementById('luggage').value;
+    const rawDt = document.getElementById('datetime').value;
+    const flight = document.getElementById('flight').value;
+    const luggage = document.getElementById('luggage').value;
 
-            if(!rawDt || !flight || !luggage) return alert("請填寫完整資訊");
+    if(!rawDt || !flight || !luggage) return alert("請填寫完整資訊");
 
-            const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${flight}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${luggage}`;
+    const msgText = `【機場接送預約】\n` +
+                  `服務：${document.getElementById('type').value}\n` +
+                  `時間：${rawDt.replace('T', ' ')}\n` +
+                  `航班：${flight}\n` +
+                  `人數：${document.getElementById('passengers').value}人\n` +
+                  `車種：${document.getElementById('vehicle').value}\n` +
+                  `行李：${luggage}`;
 
-            try {
-                await liff.sendMessages();
-                liff.closeWindow();
-            } catch (err) {
-                alert("發送失敗！原因：" + err.message);
-            }
-        }
+    try {
+        // 這裡就是你剛才看到的那個位置，現在加上參數了
+        await liff.sendMessages();
+        liff.closeWindow(); // 發送成功後關閉視窗
+    } catch (err) {
+        alert("發送失敗！錯誤原因：" + err.message);
+    }
+}
     </script>
 </body>
 </html>
