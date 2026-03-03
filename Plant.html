@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <!-- 1. 修正：引入完整 LINE LIFF SDK 網址 -->
+    <!-- 修正後的完整 SDK 網址 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
@@ -68,7 +68,6 @@
             note.style.display = (type === "送機") ? "block" : "none";
         }
 
-        // 2. 修正：正確的 Option 禁用語法
         function checkVehicle() {
             const pCount = parseInt(document.getElementById('passengers').value);
             const vehicleSelect = document.getElementById('vehicle');
@@ -83,22 +82,20 @@
             }
         }
 
-         function sendOrder() {
-            // 取得 datetime-local 的值並稍微美化格式 (將 T 換成空格)
+        function sendOrder() {
             const rawDatetime = document.getElementById('datetime').value;
-            const formattedDatetime = rawDatetime.replace('T', ' ');
-
             if(!rawDatetime) {
                 alert("請選擇預約日期與時間");
                 return;
             }
+            const formattedDatetime = rawDatetime.replace('T', ' ');
 
             const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${formattedDatetime}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
             
             liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
                 liff.closeWindow(); 
             }).catch((err) => {
-                alert("發送失敗，請確認 LINE 權限或在 LINE App 內開啟");
+                alert("發送失敗，請確保在 LINE 內開啟並同意傳送訊息權限。");
                 console.error(err);
             });
         }
