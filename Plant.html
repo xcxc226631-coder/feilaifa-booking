@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <!-- 確保 SDK 網址完全正確 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        /* 按鈕還沒準備好時的樣式 */
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #transferNote { display: none; color: #d9534f; font-size: 14px; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -26,11 +25,10 @@
                 <option value="送機">送機</option>
             </select>
         </div>
-        <div id="transferNote" style="display: none; color: #d9534f; font-size: 14px; font-weight: bold; margin-bottom: 10px;">
-            ☆☆☆送機時間請填寫司機到上車點的時間
-        </div>
+        <div id="transferNote">☆☆☆送機時間請填寫司機到上車點的時間</div>
+        
         <div class="form-group">
-            <label>預約日期與時間</label>
+            <label>日期與時間</label>
             <input type="datetime-local" id="datetime" required>
         </div>
         <div class="form-group">
@@ -55,23 +53,22 @@
             <label>行李數量/大小</label>
             <input type="text" id="luggage" placeholder="例如：28吋*2 (無則填無)">
         </div>
-        <!-- 初始狀態設為 disabled，等到 LIFF 好了才啟用 -->
-        <button type="button" id="submitBtn" onclick="sendOrder()" disabled>載入中，請稍候...</button>
+        <button type="button" id="submitBtn" onclick="sendOrder()" disabled>載入中...</button>
     </form>
 
     <script>
-        // 1. 初始化 LIFF
-        liff.init({ liffId: "2009263508-hAj1Qpgw" }).then(() => {
-            console.log("LIFF Init Success");
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = false; // 啟用按鈕
-            btn.innerText = "送出預約";
+        const LIFF_ID = "2009263508-hAj1Qpgw";
 
+        liff.init({ liffId: LIFF_ID }).then(() => {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = false;
+            btn.innerText = "確認送出預約";
+            
             if (!liff.isLoggedIn()) {
                 liff.login();
             }
         }).catch((err) => {
-            alert("LIFF 載入失敗，請確認網路或 LIFF ID：" + err);
+            alert("LIFF 初始化失敗，請檢查網路或 ID");
         });
 
         function toggleNote() {
@@ -84,26 +81,31 @@
             const vehicleSelect = document.getElementById('vehicle');
             if (pCount >= 5) {
                 vehicleSelect.value = "7人座以上";
-                vehicleSelect.options[0].disabled = true; 
-                vehicleSelect.options[1].disabled = true; 
+                vehicleSelect.options[0].disabled = true; // 轎車
+                vehicleSelect.options[1].disabled = true; // 休旅車
             } else {
                 vehicleSelect.options[0].disabled = false;
                 vehicleSelect.options[1].disabled = false;
             }
         }
 
-        function sendOrder() {
+        async function sendOrder() {
             const rawDt = document.getElementById('datetime').value;
-            if(!rawDt) return alert("請填寫預約時間");
+            if(!rawDt) return alert("請填寫預約日期與時間！");
 
-            const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
-            
-            // 2. 檢查發送權限
-            liff.sendMessages().then(() => {
-                liff.closeWindow(); 
-            }).catch((err) => {
-                alert("發送失敗！請確認是否已在 LINE 授權視窗點選「接受」。\n錯誤訊息：" + err);
-            });
+            const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
+
+            try {
+                // 核心關鍵：檢查權限並發送
+                if (liff.isInClient()) {
+                    await liff.sendMessages();
+                    liff.closeWindow();
+                } else {
+                    alert("請在 LINE App 內使用此表單！\n\n您的訊息：\n" + msgText);
+                }
+            } catch (err) {
+                alert("發送失敗！可能原因：\n1. 權限沒開 (chat_message.write)\n2. 沒按接受授權\n\n錯誤代碼：" + err.message);
+            }
         }
     </script>
 </body>
