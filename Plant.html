@@ -27,9 +27,9 @@
          <div id="transferNote" style="display: none; color: #d9534f; font-size: 14px; font-weight: bold; margin-bottom: 10px;">
             ☆☆☆送機時間請填寫司機到上車點的時間
         </div>
-        <div class="form-group">
-            <label>日期</label>
-            <input type="date" id="date" required>
+         <div class="form-group">
+            <label id="dateLabel">預約日期與時間</label>
+            <input type="datetime-local" id="datetime" required>
         </div>
         <div class="form-group">
             <label>航班資訊</label>
@@ -83,13 +83,22 @@
             }
         }
 
-        function sendOrder() {
-            const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n日期：${document.getElementById('date').value}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
+         function sendOrder() {
+            // 取得 datetime-local 的值並稍微美化格式 (將 T 換成空格)
+            const rawDatetime = document.getElementById('datetime').value;
+            const formattedDatetime = rawDatetime.replace('T', ' ');
+
+            if(!rawDatetime) {
+                alert("請選擇預約日期與時間");
+                return;
+            }
+
+            const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${formattedDatetime}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
             
             liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
                 liff.closeWindow(); 
             }).catch((err) => {
-                alert("請點擊「接受」權限才能自動傳送訊息，或在 LINE 中開啟。");
+                alert("發送失敗，請確認 LINE 權限或在 LINE App 內開啟");
                 console.error(err);
             });
         }
