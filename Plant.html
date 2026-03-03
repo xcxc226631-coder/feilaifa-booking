@@ -78,22 +78,34 @@
             else { v.options[0].disabled = false; v.options[1].disabled = false; }
         }
 
-        async function sendOrder() {
-            const rawDt = document.getElementById('datetime').value;
-            const flight = document.getElementById('flight').value;
-            const luggage = document.getElementById('luggage').value;
+       async function sendOrder() {
+    const type = document.getElementById('type').value;
+    const rawDt = document.getElementById('datetime').value;
+    const flight = document.getElementById('flight').value;
+    const passengers = document.getElementById('passengers').value;
+    const vehicle = document.getElementById('vehicle').value;
+    const luggage = document.getElementById('luggage').value;
 
-            if(!rawDt || !flight || !luggage) return alert("請填寫完整預約資訊");
+    // 防呆驗證
+    if(!rawDt || !flight || !luggage) return alert("請填寫完整預約資訊");
 
-            const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${flight}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${luggage}`;
+    const msgText = `【機場接送預約】\n` +
+                  `服務：${type}\n` +
+                  `時間：${rawDt.replace('T', ' ')}\n` +
+                  `航班：${flight}\n` +
+                  `人數：${passengers}人\n` +
+                  `車種：${vehicle}\n` +
+                  `行李：${luggage}`;
 
-            try {
-                await liff.sendMessages();
-                liff.closeWindow();
-            } catch (err) {
-                alert("❌ 發送失敗：" + err.message + "\n請解除連動後重新進入並授權。");
-            }
-        }
+    try {
+        // 修正處：務必傳入符合格式的陣列物件
+        await liff.sendMessages();
+        liff.closeWindow(); // 傳送成功後關閉
+    } catch (err) {
+        // 這裡會跳出具體的錯誤代碼，如果是 "User has not granted permission" 就是後台沒勾好
+        alert("❌ 錯誤原因：" + err.message);
+    }
+} // <--- 補上這個漏掉的結束括號
     </script>
 </body>
 </html>
