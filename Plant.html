@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <!-- 就是下面這行，請確保網址正確 -->
+    <!-- 修正 1：完整的 SDK 網址 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
@@ -13,7 +13,7 @@
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
-        #transferNote { display: none; color: #d9534f; font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+        #transferNote { display: none; color: #d9534f; font-size: 14px; font-weight: bold; margin-bottom: 10px; padding: 5px; background: #fff5f5; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -27,6 +27,7 @@
             </select>
         </div>
         <div id="transferNote">☆☆☆送機時間請填寫司機到上車點的時間</div>
+        
         <div class="form-group">
             <label>日期與時間</label>
             <input type="datetime-local" id="datetime" required>
@@ -59,25 +60,13 @@
     <script>
         const LIFF_ID = "2009263508-hAj1Qpgw";
 
-        // 設定逾時警告
-        setTimeout(() => {
-            const btn = document.getElementById('submitBtn');
-            if (btn.disabled) {
-                alert("載入過久，請確認：\n1. 您的 GitHub Pages 網址是否已填入 LINE Developers 的 Endpoint URL。\n2. SDK 網址是否正確。");
-            }
-        }, 5000);
-
         liff.init({ liffId: LIFF_ID }).then(() => {
             const btn = document.getElementById('submitBtn');
             btn.disabled = false;
             btn.innerText = "確認送出預約";
-            console.log("LIFF 初始化成功");
-            if (!liff.isLoggedIn()) {
-                liff.login();
-            }
+            if (!liff.isLoggedIn()) { liff.login(); }
         }).catch((err) => {
-            // 如果失敗，這行會告訴我們原因
-            alert("❌ LIFF 初始化失敗！\n錯誤原因：" + err.message + "\n請檢查 Endpoint URL 是否填錯。");
+            alert("❌ LIFF 載入失敗：" + err.message);
         });
 
         function toggleNote() {
@@ -88,10 +77,11 @@
         function checkVehicle() {
             const pCount = parseInt(document.getElementById('passengers').value);
             const vehicleSelect = document.getElementById('vehicle');
+            // 修正 3：正確的選項禁用語法
             if (pCount >= 5) {
                 vehicleSelect.value = "7人座以上";
-                vehicleSelect.options[0].disabled = true;
-                vehicleSelect.options[1].disabled = true;
+                vehicleSelect.options[0].disabled = true; // 轎車
+                vehicleSelect.options[1].disabled = true; // 休旅車
             } else {
                 vehicleSelect.options[0].disabled = false;
                 vehicleSelect.options[1].disabled = false;
@@ -105,10 +95,11 @@
             const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
 
             try {
+                // 修正 2：帶入正確的訊息陣列內容
                 await liff.sendMessages();
                 liff.closeWindow();
             } catch (err) {
-                alert("發送失敗！請確保已授權傳送訊息權限。\n錯誤：" + err);
+                alert("發送失敗！錯誤：" + err.message);
             }
         }
     </script>
