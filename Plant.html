@@ -20,7 +20,13 @@
     <form id="bookingForm">
         <div class="form-group">
             <label>類別</label>
-            <select id="type"><option>接機</option><option>送機</option></select>
+            <select id="type" onchange="toggleNote()">
+                <option value="接機">接機</option>
+                <option value="送機">送機</option>
+            </select>
+        </div>
+         <div id="transferNote" style="display: none; color: #d9534f; font-size: 14px; font-weight: bold; margin-bottom: 10px;">
+            ☆☆☆送機時間請填寫司機到上車點的時間
         </div>
         <div class="form-group">
             <label>日期</label>
