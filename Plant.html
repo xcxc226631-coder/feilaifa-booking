@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
+    <!-- 確保這一行完全正確 -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
@@ -26,7 +27,6 @@
             </select>
         </div>
         <div id="transferNote">☆☆☆送機時間請填寫司機到上車點的時間</div>
-        
         <div class="form-group">
             <label>日期與時間</label>
             <input type="datetime-local" id="datetime" required>
@@ -59,16 +59,21 @@
     <script>
         const LIFF_ID = "2009263508-hAj1Qpgw";
 
+        // 設定逾時警告
+        setTimeout(() => {
+            const btn = document.getElementById('submitBtn');
+            if (btn.disabled) {
+                alert("載入過久，請確認：\n1. 您的 GitHub Pages 網址是否已填入 LINE Developers 的 Endpoint URL。\n2. SDK 網址是否正確。");
+            }
+        }, 5000);
+
         liff.init({ liffId: LIFF_ID }).then(() => {
             const btn = document.getElementById('submitBtn');
             btn.disabled = false;
             btn.innerText = "確認送出預約";
-            
-            if (!liff.isLoggedIn()) {
-                liff.login();
-            }
+            if (!liff.isLoggedIn()) { liff.login(); }
         }).catch((err) => {
-            alert("LIFF 初始化失敗，請檢查網路或 ID");
+            alert("LIFF 初始化失敗：" + err);
         });
 
         function toggleNote() {
@@ -81,8 +86,8 @@
             const vehicleSelect = document.getElementById('vehicle');
             if (pCount >= 5) {
                 vehicleSelect.value = "7人座以上";
-                vehicleSelect.options[0].disabled = true; // 轎車
-                vehicleSelect.options[1].disabled = true; // 休旅車
+                vehicleSelect.options[0].disabled = true;
+                vehicleSelect.options[1].disabled = true;
             } else {
                 vehicleSelect.options[0].disabled = false;
                 vehicleSelect.options[1].disabled = false;
@@ -91,20 +96,15 @@
 
         async function sendOrder() {
             const rawDt = document.getElementById('datetime').value;
-            if(!rawDt) return alert("請填寫預約日期與時間！");
+            if(!rawDt) return alert("請選擇日期與時間");
 
             const msgText = `【機場接送預約】\n服務：${document.getElementById('type').value}\n時間：${rawDt.replace('T', ' ')}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
 
             try {
-                // 核心關鍵：檢查權限並發送
-                if (liff.isInClient()) {
-                    await liff.sendMessages();
-                    liff.closeWindow();
-                } else {
-                    alert("請在 LINE App 內使用此表單！\n\n您的訊息：\n" + msgText);
-                }
+                await liff.sendMessages();
+                liff.closeWindow();
             } catch (err) {
-                alert("發送失敗！可能原因：\n1. 權限沒開 (chat_message.write)\n2. 沒按接受授權\n\n錯誤代碼：" + err.message);
+                alert("發送失敗！請確保已授權傳送訊息權限。\n錯誤：" + err);
             }
         }
     </script>
