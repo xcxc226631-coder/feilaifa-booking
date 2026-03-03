@@ -67,13 +67,17 @@
             }
         }, 5000);
 
-        liff.init({ liffId:2009263508-hAj1Qpgw}).then(() => {
+        liff.init({ liffId: LIFF_ID }).then(() => {
             const btn = document.getElementById('submitBtn');
             btn.disabled = false;
             btn.innerText = "確認送出預約";
-            if (!liff.isLoggedIn()) { liff.login(); }
+            console.log("LIFF 初始化成功");
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            }
         }).catch((err) => {
-            alert("LIFF 初始化失敗：" + err);
+            // 如果失敗，這行會告訴我們原因
+            alert("❌ LIFF 初始化失敗！\n錯誤原因：" + err.message + "\n請檢查 Endpoint URL 是否填錯。");
         });
 
         function toggleNote() {
