@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機場接送預約</title>
+    <!-- 引入 LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        button:disabled { background-color: #ccc; }
+    </style>
+</head>
+<body>
+    <h3>🚖 機場接送預約單</h3>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label>類別</label>
+            <select id="type"><option>接機</option><option>送機</option></select>
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="date" required>
+        </div>
+        <div class="form-group">
+            <label>航班資訊</label>
+            <input type="text" id="flight" placeholder="如：BR191" required>
+        </div>
+        <div class="form-group">
+            <label>人數</label>
+            <select id="passengers" onchange="checkVehicle()">
+                <!-- 產生 1~8 選項 -->
+                <script>for(let i=1;i<=8;i++) document.write(`<option value="${i}">${i}人</option>`);</script>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>車種</label>
+            <select id="vehicle">
+                <option value="轎車">轎車 (限4人)</option>
+                <option value="休旅車">休旅車 (限4人)</option>
+                <option value="7人座以上">7人座以上</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>行李數量/大小</label>
+            <input type="text" id="luggage" placeholder="例如：28吋*2 (無則填無)">
+        </div>
+        <button type="button" id="submitBtn" onclick="sendOrder()">送出預約</button>
+    </form>
+
+    <script>
+        // 初始化 LIFF
+        liff.init({ liffId: "你的LIFF_ID" }).then(() => {
+            if (!liff.isLoggedIn()) { liff.login(); }
+        });
+
+        // 人數與車種連動邏輯
+        function checkVehicle() {
+            const pCount = parseInt(document.getElementById('passengers').value);
+            const vehicleSelect = document.getElementById('vehicle');
+            
+            if (pCount >= 5) {
+                vehicleSelect.value = "7人座以上";
+                vehicleSelect.options[0].disabled = true; // 禁用轎車
+                vehicleSelect.options[1].disabled = true; // 禁用休旅車
+            } else {
+                vehicleSelect.options[0].disabled = false;
+                vehicleSelect.options[1].disabled = false;
+            }
+        }
+
+        // 發送訊息至 LINE
+        function sendOrder() {
+            const msg = `【機場接送預約】\n服務：${document.getElementById('type').value}\n日期：${document.getElementById('date').value}\n航班：${document.getElementById('flight').value}\n人數：${document.getElementById('passengers').value}人\n車種：${document.getElementById('vehicle').value}\n行李：${document.getElementById('luggage').value}`;
+            
+            liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
+                liff.closeWindow(); // 發送後自動關閉視窗
+            }).catch((err) => {
+                alert("發送失敗，請確認是否在 LINE 中開啟：" + err);
+            });
+        }
+    </script>
+</body>
+</html>
