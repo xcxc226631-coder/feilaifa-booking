@@ -59,23 +59,10 @@
     <script>
         const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
-        // 偵錯輔助：如果 5 秒後還沒啟動，彈出視窗
-        const debugTimer = setTimeout(() => {
-            if (document.getElementById('submitBtn').disabled) {
-                alert("❌ SDK 載入超時！請嘗試點擊右上角「...」並選擇「重新整理」");
-            }
-        }, 5000);
-
         async function init() {
             try {
-                // 確保 liff 變數存在
-                if (typeof liff === 'undefined') {
-                    throw new Error("找不到 liff 變數，請確認 SDK 載入路徑");
-                }
-                
+                if (typeof liff === 'undefined') return;
                 await liff.init({ liffId: LIFF_ID });
-                clearTimeout(debugTimer);
-
                 if (!liff.isLoggedIn()) {
                     liff.login();
                 } else {
@@ -88,7 +75,6 @@
             }
         }
 
-        // 網頁載入後執行
         window.onload = init;
 
         function toggleNote() {
@@ -98,42 +84,43 @@
 
         function checkVehicle() {
             const pCount = parseInt(document.getElementById('passengers').value);
-            const vehicleSelect = document.getElementById('vehicle');
+            const vSelect = document.getElementById('vehicle');
             if (pCount >= 5) {
-                vehicleSelect.value = "7人座以上";
-                vehicleSelect.options[0].disabled = true;
-                vehicleSelect.options[1].disabled = true;
+                vSelect.value = "7人座以上";
+                vSelect.options[0].disabled = true;
+                vSelect.options[1].disabled = true;
             } else {
-                vehicleSelect.options[0].disabled = false;
-                vehicleSelect.options[1].disabled = false;
+                vSelect.options[0].disabled = false;
+                vSelect.options[1].disabled = false;
             }
         }
 
         async function sendOrder() {
-    const type = document.getElementById('type').value;
-    const rawDt = document.getElementById('datetime').value;
-    const flight = document.getElementById('flight').value;
-    const passengers = document.getElementById('passengers').value;
-    const vehicle = document.getElementById('vehicle').value;
-    const luggage = document.getElementById('luggage').value;
+            const type = document.getElementById('type').value;
+            const rawDt = document.getElementById('datetime').value;
+            const flight = document.getElementById('flight').value;
+            const passengers = document.getElementById('passengers').value;
+            const vehicle = document.getElementById('vehicle').value;
+            const luggage = document.getElementById('luggage').value;
 
-    if(!rawDt || !flight || !luggage) return alert("請填寫完整預約資訊");
+            if(!rawDt || !flight || !luggage) return alert("請填寫完整預約資訊");
 
-    const msgText = `【機場接送預約】\n` +
-                  `服務：${type}\n` +
-                  `時間：${rawDt.replace('T', ' ')}\n` +
-                  `航班：${flight}\n` +
-                  `人數：${passengers}人\n` +
-                  `車種：${vehicle}\n` +
-                  `行李：${luggage}`;
+            const msgText = `【機場接送預約】\n` +
+                          `服務：${type}\n` +
+                          `時間：${rawDt.replace('T', ' ')}\n` +
+                          `航班：${flight}\n` +
+                          `人數：${passengers}人\n` +
+                          `車種：${vehicle}\n` +
+                          `行李：${luggage}`;
 
-    try {
-    await liff.sendMessages();
-    liff.closeWindow();
-} catch (err) {
-    // 如果跳出 "User has not granted permission"，就是第一步跟第二步沒做好
-    alert("❌ 錯誤原因：" + err.message + "\n請確保已在 LINE 設定中允許「傳送訊息」權限。");
-}
+            try {
+                // 核心修正：加入陣列與物件參數
+                await liff.sendMessages();
+                liff.closeWindow();
+            } catch (err) {
+                alert("❌ 錯誤原因：" + err.message + "\n請確保已在 LINE Developers 後台勾選 chat_message.write 權限。");
+            }
+        } // 這裡補上了漏掉的 }
     </script>
 </body>
 </html>
