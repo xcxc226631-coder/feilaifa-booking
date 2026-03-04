@@ -109,8 +109,11 @@
                 text: msgText
             }
         ]);
+       
+        // 先顯示成功提示
+        alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
         
-        // 5. 成功後自動關閉視窗
+        // 點選確定後關閉 LIFF 頁面，回到聊天室
         liff.closeWindow();
         
     } catch (err) {
