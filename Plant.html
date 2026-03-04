@@ -80,8 +80,13 @@
         const container = document.getElementById('addressContainer');
         const div = document.createElement('div');
         div.style = "display: flex; gap: 5px; margin-bottom: 5px;";
+        
+        // 根據目前模式決定 placeholder 字眼
+        const type = document.getElementById('type').value;
+        const placeholderText = (type === "送機") ? "額外上車點" : "額外下車點";
+        
         div.innerHTML = `
-            <input type="text" class="pickup-addr" placeholder="額外地點" required>
+            <input type="text" class="pickup-addr" placeholder="${placeholderText}" required>
             <button type="button" onclick="this.parentElement.remove()" style="width: 45px; margin-top: 0; padding: 5px; background-color: #d9534f; color: white; border: none; border-radius: 4px;">－</button>
         `;
         container.appendChild(div);
@@ -92,13 +97,16 @@
         const type = document.getElementById('type').value;
         const note = document.getElementById('transferNote');
         const addrLabel = document.getElementById('addrLabel');
+        const addrInputs = document.querySelectorAll('.pickup-addr');
         
         if (type === "送機") {
             note.style.display = "block";
             addrLabel.innerText = "上車地點";
+            addrInputs.forEach(input => input.placeholder = "請輸入詳細地址");
         } else {
             note.style.display = "none";
             addrLabel.innerText = "下車地點";
+            addrInputs.forEach(input => input.placeholder = "請輸入詳細地址");
         }
     }
 
@@ -123,7 +131,12 @@
         const vehicle = document.getElementById('vehicle').value;
         const luggage = document.getElementById('luggage').value;
         
-        // 根據類型決定字眼
+        // 1. 日期格式化：2026-03-04T17:00 -> 2026年03月04日 17:00
+        const formattedDt = rawDt.replace('-', '年')
+                                 .replace('-', '月')
+                                 .replace('T', '日 ');
+
+        // 2. 根據類型決定字眼
         const addrType = (type === "送機") ? "上車" : "下車";
 
         const addrInputs = document.querySelectorAll('.pickup-addr');
@@ -134,13 +147,15 @@
             }
         });
 
+        // 3. 驗證
         if (!rawDt || !flight || !luggage || addresses.length === 0) {
             return alert(`請填寫完整資訊（含${addrType}地點）`);
         }
 
+        // 4. 組裝訊息
         const msgText = `【機場接送預約】\n` +
                       `服務：${type}\n` +
-                      `時間：${rawDt.replace('T', ' ')}\n` +
+                      `時間：${formattedDt}\n` +
                       `${addresses.join('\n')}\n` +
                       `航班：${flight}\n` +
                       `人數：${passengers}人\n` +
@@ -148,6 +163,7 @@
                       `行李：${luggage}`;
 
         try {
+            // 5. 送出訊息
             await liff.sendMessages([{ type: 'text', text: msgText }]);
             alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
             liff.closeWindow();
@@ -156,7 +172,6 @@
         }
     }
 </script>
-
 
 </body>
 </html>
