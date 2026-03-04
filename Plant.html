@@ -163,8 +163,18 @@
                       `行李：${luggage}`;
 
         try {
-            // 5. 送出訊息
-            await liff.sendMessages([{ type: 'text', text: msgText }]);
+            // 5. 【核心修正】先發送「我要叫車」，再發送預約單內容
+            await liff.sendMessages([
+                {
+                    type: 'text',
+                    text: '我要叫車'
+                },
+                {
+                    type: 'text',
+                    text: msgText
+                }
+            ]);
+           
             alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
             liff.closeWindow();
         } catch (err) {
