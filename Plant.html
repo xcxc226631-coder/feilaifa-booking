@@ -56,81 +56,100 @@
     </form>
 
     <script>
-        const LIFF_ID = "2009263508-hAj1Qpgw"; 
+    const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
-        async function init() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                } else {
-                    const btn = document.getElementById('submitBtn');
-                    btn.disabled = false;
-                    btn.innerText = "確認送出預約";
-                    btn.onclick = sendOrder;
+    async function init() {
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            } else {
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = false;
+                btn.innerText = "確認送出預約";
+                btn.onclick = sendOrder;
+            }
+        } catch (err) {
+            alert("❌ 初始化失敗：" + err.message);
+        }
+    }
+    window.onload = init;
+
+    // 新增地點欄位函式
+    function addAddress() {
+        const container = document.getElementById('addressContainer');
+        const div = document.createElement('div');
+        div.style = "display: flex; gap: 5px; margin-bottom: 5px;";
+        div.innerHTML = `
+            <input type="text" class="pickup-addr" placeholder="額外上車點" required>
+            <button type="button" onclick="this.parentElement.remove()" style="width: 45px; margin-top: 0; padding: 5px; background-color: #d9534f; color: white; border: none; border-radius: 4px;">－</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function toggleNote() {
+        const type = document.getElementById('type').value;
+        document.getElementById('transferNote').style.display = (type === "送機") ? "block" : "none";
+    }
+
+    function checkVehicle() {
+        const p = parseInt(document.getElementById('passengers').value);
+        const v = document.getElementById('vehicle');
+        if (p >= 5) { v.value = "7人座以上"; v.options[0].disabled = true; v.options[1].disabled = true; }
+        else { v.options[0].disabled = false; v.options[1].disabled = false; }
+    }
+
+    async function sendOrder() {
+        // 1. 取得基本欄位數值
+        const type = document.getElementById('type').value;
+        const rawDt = document.getElementById('datetime').value;
+        const flight = document.getElementById('flight').value;
+        const passengers = document.getElementById('passengers').value;
+        const vehicle = document.getElementById('vehicle').value;
+        const luggage = document.getElementById('luggage').value;
+
+        // 2. 取得所有動態上車地點
+        const addrInputs = document.querySelectorAll('.pickup-addr');
+        let addresses = [];
+        addrInputs.forEach((input, index) => {
+            if (input.value.trim() !== "") {
+                addresses.push(`上車地點${index + 1}：${input.value}`);
+            }
+        });
+
+        // 3. 防呆驗證
+        if (!rawDt || !flight || !luggage || addresses.length === 0) {
+            return alert("請填寫完整預約資訊（含上車地點）");
+        }
+
+        // 4. 組裝訊息文字
+        const msgText = `【機場接送預約】\n` +
+                      `服務：${type}\n` +
+                      `時間：${rawDt.replace('T', ' ')}\n` +
+                      `${addresses.join('\n')}\n` +
+                      `航班：${flight}\n` +
+                      `人數：${passengers}人\n` +
+                      `車種：${vehicle}\n` +
+                      `行李：${luggage}`;
+
+        try {
+            // 5. 傳送訊息
+            await liff.sendMessages([
+                {
+                    type: 'text',
+                    text: msgText
                 }
-            } catch (err) {
-                alert("❌ 初始化失敗：" + err.message);
-            }
+            ]);
+           
+            alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
+            liff.closeWindow();
+            
+        } catch (err) {
+            alert("❌ 傳送失敗原因：\n" + err.message);
+            console.error("LIFF sendMessages Error:", err);
         }
-        window.onload = init;
-
-        function toggleNote() {
-            const type = document.getElementById('type').value;
-            document.getElementById('transferNote').style.display = (type === "送機") ? "block" : "none";
-        }
-
-        function checkVehicle() {
-            const p = parseInt(document.getElementById('passengers').value);
-            const v = document.getElementById('vehicle');
-            if (p >= 5) { v.value = "7人座以上"; v.options[0].disabled = true; v.options[1].disabled = true; }
-            else { v.options[0].disabled = false; v.options[1].disabled = false; }
-        }
-
-       async function sendOrder() {
-    // 1. 取得所有欄位數值
-    const type = document.getElementById('type').value;
-    const rawDt = document.getElementById('datetime').value;
-    const flight = document.getElementById('flight').value;
-    const passengers = document.getElementById('passengers').value;
-    const vehicle = document.getElementById('vehicle').value;
-    const luggage = document.getElementById('luggage').value;
-
-    // 2. 防呆驗證
-    if(!rawDt || !flight || !luggage) {
-        return alert("請填寫完整預約資訊");
     }
+</script>
 
-    // 3. 組裝訊息文字
-    const msgText = `【機場接送預約】\n` +
-                  `服務：${type}\n` +
-                  `時間：${rawDt.replace('T', ' ')}\n` +
-                  `航班：${flight}\n` +
-                  `人數：${passengers}人\n` +
-                  `車種：${vehicle}\n` +
-                  `行李：${luggage}`;
-
-    try {
-        // 4. 【核心修正】將文字包裝成符合 LIFF SDK 要求的格式
-        await liff.sendMessages([
-            {
-                type: 'text',
-                text: msgText
-            }
-        ]);
-       
-        // 先顯示成功提示
-        alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
-        
-        // 點選確定後關閉 LIFF 頁面，回到聊天室
-        liff.closeWindow();
-        
-    } catch (err) {
-        alert("❌ 傳送失敗原因：\n" + err.message);
-        console.error("LIFF sendMessages Error:", err);
-    }
-}
-
-    </script>
 </body>
 </html>
