@@ -55,7 +55,7 @@
         <button type="button" id="submitBtn" disabled>載入中...</button>
     </form>
 
-    <script>
+   <script>
     const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
     async function init() {
@@ -75,54 +75,69 @@
     }
     window.onload = init;
 
-    // 新增地點欄位函式
+    // 新增地點欄位
     function addAddress() {
         const container = document.getElementById('addressContainer');
         const div = document.createElement('div');
         div.style = "display: flex; gap: 5px; margin-bottom: 5px;";
         div.innerHTML = `
-            <input type="text" class="pickup-addr" placeholder="額外上車點" required>
+            <input type="text" class="pickup-addr" placeholder="額外地點" required>
             <button type="button" onclick="this.parentElement.remove()" style="width: 45px; margin-top: 0; padding: 5px; background-color: #d9534f; color: white; border: none; border-radius: 4px;">－</button>
         `;
         container.appendChild(div);
     }
 
+    // 切換接機/送機的標籤與提示
     function toggleNote() {
         const type = document.getElementById('type').value;
-        document.getElementById('transferNote').style.display = (type === "送機") ? "block" : "none";
+        const note = document.getElementById('transferNote');
+        const addrLabel = document.getElementById('addrLabel');
+        
+        if (type === "送機") {
+            note.style.display = "block";
+            addrLabel.innerText = "上車地點";
+        } else {
+            note.style.display = "none";
+            addrLabel.innerText = "下車地點";
+        }
     }
 
     function checkVehicle() {
         const p = parseInt(document.getElementById('passengers').value);
         const v = document.getElementById('vehicle');
-        if (p >= 5) { v.value = "7人座以上"; v.options[0].disabled = true; v.options[1].disabled = true; }
-        else { v.options[0].disabled = false; v.options[1].disabled = false; }
+        if (p >= 5) {
+            v.value = "7人座以上";
+            v.options[0].disabled = true;
+            v.options[1].disabled = true;
+        } else {
+            v.options[0].disabled = false;
+            v.options[1].disabled = false;
+        }
     }
 
     async function sendOrder() {
-        // 1. 取得基本欄位數值
         const type = document.getElementById('type').value;
         const rawDt = document.getElementById('datetime').value;
         const flight = document.getElementById('flight').value;
         const passengers = document.getElementById('passengers').value;
         const vehicle = document.getElementById('vehicle').value;
         const luggage = document.getElementById('luggage').value;
+        
+        // 根據類型決定字眼
+        const addrType = (type === "送機") ? "上車" : "下車";
 
-        // 2. 取得所有動態上車地點
         const addrInputs = document.querySelectorAll('.pickup-addr');
         let addresses = [];
         addrInputs.forEach((input, index) => {
             if (input.value.trim() !== "") {
-                addresses.push(`上車地點${index + 1}：${input.value}`);
+                addresses.push(`${addrType}地點${index + 1}：${input.value}`);
             }
         });
 
-        // 3. 防呆驗證
         if (!rawDt || !flight || !luggage || addresses.length === 0) {
-            return alert("請填寫完整預約資訊（含上車地點）");
+            return alert(`請填寫完整資訊（含${addrType}地點）`);
         }
 
-        // 4. 組裝訊息文字
         const msgText = `【機場接送預約】\n` +
                       `服務：${type}\n` +
                       `時間：${rawDt.replace('T', ' ')}\n` +
@@ -133,23 +148,15 @@
                       `行李：${luggage}`;
 
         try {
-            // 5. 傳送訊息
-            await liff.sendMessages([
-                {
-                    type: 'text',
-                    text: msgText
-                }
-            ]);
-           
+            await liff.sendMessages([{ type: 'text', text: msgText }]);
             alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
             liff.closeWindow();
-            
         } catch (err) {
-            alert("❌ 傳送失敗原因：\n" + err.message);
-            console.error("LIFF sendMessages Error:", err);
+            alert("❌ 傳送失敗：" + err.message);
         }
     }
 </script>
+
 
 </body>
 </html>
