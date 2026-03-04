@@ -27,6 +27,15 @@
         </div>
         <div id="transferNote">⚠️ 提醒：送機時間請填寫「司機到上車點」的時間</div>
         <div class="form-group"><label>日期時間</label><input type="datetime-local" id="datetime" required></div>
+        <div class="form-group">
+    <label>上車地點</label>
+    <div id="addressContainer">
+        <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+            <input type="text" class="pickup-addr" placeholder="請輸入詳細地址" required>
+            <button type="button" onclick="addAddress()" style="width: 45px; margin-top: 0; padding: 5px;">＋</button>
+        </div>
+    </div>
+</div>
         <div class="form-group"><label>航班資訊</label><input type="text" id="flight" placeholder="如：BR191" required></div>
         <div class="form-group">
             <label>人數</label>
