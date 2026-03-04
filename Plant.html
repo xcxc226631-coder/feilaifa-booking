@@ -87,7 +87,7 @@
     const vehicle = document.getElementById('vehicle').value;
     const luggage = document.getElementById('luggage').value;
 
-    // 2. 防呆驗證：確保必填欄位不為空
+    // 2. 防呆驗證
     if(!rawDt || !flight || !luggage) {
         return alert("請填寫完整預約資訊");
     }
@@ -102,15 +102,18 @@
                   `行李：${luggage}`;
 
     try {
-        // 4. 【核心修正】嚴格遵守陣列物件格式
-        // 注意：這裡必須是
-        await liff.sendMessages();
+        // 4. 【核心修正】將文字包裝成符合 LIFF SDK 要求的格式
+        await liff.sendMessages([
+            {
+                type: 'text',
+                text: msgText
+            }
+        ]);
         
         // 5. 成功後自動關閉視窗
         liff.closeWindow();
         
     } catch (err) {
-        // 如果報錯，彈出具體原因
         alert("❌ 傳送失敗原因：\n" + err.message);
         console.error("LIFF sendMessages Error:", err);
     }
