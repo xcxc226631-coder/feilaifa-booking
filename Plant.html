@@ -101,8 +101,7 @@
                   `車種：${vehicle}\n` +
                   `行李：${luggage}`;
 
-    try {
-        // 4. 【核心修正】將文字包裝成符合 LIFF SDK 要求的格式
+   try {
         await liff.sendMessages([
             {
                 type: 'text',
@@ -110,14 +109,15 @@
             }
         ]);
         
-        // 5. 成功後自動關閉視窗
+        // 先顯示成功提示
+        alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
+        
+        // 點選確定後關閉 LIFF 頁面，回到聊天室
         liff.closeWindow();
         
     } catch (err) {
-        alert("❌ 傳送失敗原因：\n" + err.message);
-        console.error("LIFF sendMessages Error:", err);
+        alert("❌ 傳送失敗：" + err.message);
     }
-}
 
     </script>
 </body>
