@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; }
         .form-group { margin-bottom: 15px; }
@@ -27,6 +27,7 @@
             </select>
         </div>
         <div id="transferNote">⚠️ 提醒：送機時間請填寫「司機到上車點」的時間</div>
+        
         <div class="form-group"><label>日期時間</label><input type="datetime-local" id="datetime" required></div>
         
         <div class="form-group">
@@ -49,11 +50,11 @@
         </div>
 
         <div class="form-group">
-            <label>車種</label>
+            <label>指定車種</label>
             <select id="vehicle">
-                <option value="轎車">轎車 (限4人)</option>
-                <option value="休旅車">休旅車 (限4人)</option>
-                <option value="7人座以上">7人座以上</option>
+                <option value="一般轎車 (不指定)">一般轎車 (不指定)</option>
+                <option value="指定休旅車 (+100)">休旅車 (+100)</option>
+                <option value="指定7人座以上 (+300)">7人座以上 (+300)</option>
             </select>
         </div>
 
@@ -109,19 +110,18 @@
         if (type === "送機") {
             note.style.display = "block";
             addrLabel.innerText = "上車地點";
-            addrInputs.forEach(input => input.placeholder = "請輸入上車地址");
         } else {
             note.style.display = "none";
             addrLabel.innerText = "下車地點";
-            addrInputs.forEach(input => input.placeholder = "請輸入下車地址");
         }
     }
 
     function checkVehicle() {
         const p = parseInt(document.getElementById('passengers').value);
         const v = document.getElementById('vehicle');
+        // 如果超過 4 人，強制切換至 7 人座
         if (p >= 5) {
-            v.value = "7人座以上";
+            v.value = "指定7人座以上 (+300)";
             v.options[0].disabled = true;
             v.options[1].disabled = true;
         } else {
