@@ -1,6 +1,178 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+<head><!DOCTYPE html>
+<html lang="zh-TW">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機場接送預約</title>
+    <script src="https://static.line-scdn.net"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        button:disabled { background-color: #ccc; }
+        #transferNote { display: none; color: #d9534f; font-size: 13px; font-weight: bold; padding: 10px; background: #fff5f5; border-radius: 6px; margin-bottom: 10px; }
+        .warning-text { color: #d9534f; font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block; }
+    </style>
+</head>
+<body>
+    <h3>✈️飛來發機場接送預約單✈️</h3>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label>類別</label>
+            <select id="type" onchange="toggleNote()">
+                <option value="接機">接機 (機場 → 市區)</option>
+                <option value="送機">送機 (市區 → 機場)</option>
+            </select>
+        </div>
+        <div id="transferNote">⚠️ 提醒：送機時間請填寫「司機到上車點」的時間</div>
+        <div class="form-group"><label>日期時間</label><input type="datetime-local" id="datetime" required></div>
+        
+        <div class="form-group">
+            <label id="addrLabel">下車地點</label>
+            <div id="addressContainer">
+                <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                    <input type="text" class="pickup-addr" placeholder="請輸入詳細地址" required>
+                    <button type="button" onclick="addAddress()" style="width: 45px; margin-top: 0; padding: 5px; background-color: #00b900; color: white; border: none; border-radius: 4px;">＋</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label id="flightLabel">航班資訊</label>
+            <input type="text" id="flight" placeholder="如：BR191" required>
+        </div>
+        
+        <div class="form-group">
+            <label>人數</label>
+            <select id="passengers">
+                <script>for(let i=1; i<=8; i++) document.write(`<option value="${i}">${i}人</option>`);</script>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>指定車種</label>
+            <select id="vehicle">
+                <option value="不指定">不指定</option>
+                <option value="指定休旅車 (+100)">休旅車 (+100)</option>
+                <option value="指定7人座以上 (+300)">7人座以上 (+300)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>行李數量/大小</label>
+            <span class="warning-text">⚠️ 請務必照實填寫行李數量大小，避免司機載不走行李</span>
+            <input type="text" id="luggage" placeholder="例如：28吋*2, 20吋*1" required>
+        </div>
+
+        <button type="button" id="submitBtn" disabled>載入中...</button>
+    </form>
+
+<script>
+    // 請再次確認此 ID 是否與 LINE Developer Console 一致 (有無多空格)
+    const LIFF_ID = "2009263508-hAj1Qpgw"; 
+
+    async function init() {
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            } else {
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = false;
+                btn.innerText = "確認送出預約";
+                btn.onclick = sendOrder;
+            }
+        } catch (err) {
+            alert("❌ 初始化失敗：" + err.message);
+        }
+    }
+    window.onload = init;
+
+    function addAddress() {
+        const container = document.getElementById('addressContainer');
+        const div = document.createElement('div');
+        div.style = "display: flex; gap: 5px; margin-bottom: 5px;";
+        div.innerHTML = `
+            <input type="text" class="pickup-addr" placeholder="請輸入詳細地址" required>
+            <button type="button" onclick="this.parentElement.remove()" style="width: 45px; margin-top: 0; padding: 5px; background-color: #d9534f; color: white; border: none; border-radius: 4px;">－</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function toggleNote() {
+        const type = document.getElementById('type').value;
+        const note = document.getElementById('transferNote');
+        const addrLabel = document.getElementById('addrLabel');
+        const flightLabel = document.getElementById('flightLabel');
+        const flightInput = document.getElementById('flight');
+        
+        if (type === "送機") {
+            note.style.display = "block";
+            addrLabel.innerText = "上車地點";
+            flightLabel.innerText = "抵達機場/航廈";
+            flightInput.placeholder = "如：桃園機場第一航廈";
+        } else {
+            note.style.display = "none";
+            addrLabel.innerText = "下車地點";
+            flightLabel.innerText = "航班資訊";
+            flightInput.placeholder = "如：BR191";
+        }
+    }
+
+    async function sendOrder() {
+        const type = document.getElementById('type').value;
+        const rawDt = document.getElementById('datetime').value;
+        const flight = document.getElementById('flight').value;
+        const passengers = document.getElementById('passengers').value;
+        const vehicle = document.getElementById('vehicle').value;
+        const luggage = document.getElementById('luggage').value;
+        
+        if (!rawDt) return alert("請選擇預約時間");
+
+        const formattedDt = rawDt.replace('-', '年').replace('-', '月').replace('T', '日 ');
+        const addrType = (type === "送機") ? "上車" : "下車";
+        const flightInfoLabel = (type === "送機") ? "目的地" : "航班";
+
+        const addrInputs = document.querySelectorAll('.pickup-addr');
+        let addresses = [];
+        addrInputs.forEach((input, index) => {
+            if (input.value.trim() !== "") {
+                addresses.push(`${addrType}地點${index + 1}：${input.value}`);
+            }
+        });
+
+        if (!flight || !luggage || addresses.length === 0) {
+            return alert(`請填寫完整資訊`);
+        }
+
+        const msgText = `✈️機場接送預約✈️\n` +
+                      `服務：${type}\n` +
+                      `時間：${formattedDt}\n` +
+                      `${addresses.join('\n')}\n` +
+                      `${flightInfoLabel}：${flight}\n` +
+                      `人數：${passengers}人\n` +
+                      `車種：${vehicle}\n` +
+                      `行李：${luggage}`;
+
+        try {
+            await liff.sendMessages([
+                { type: 'text', text: '我要叫車' },
+                { type: 'text', text: msgText }
+            ]);
+            alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
+            liff.closeWindow();
+        } catch (err) {
+            alert("❌ 傳送失敗：" + err.message);
+        }
+    }
+</script>
+</body>
+</html>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
