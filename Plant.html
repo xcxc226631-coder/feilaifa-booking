@@ -27,7 +27,6 @@
             </select>
         </div>
         <div id="transferNote">⚠️ 提醒：送機時間請填寫「司機到上車點」的時間</div>
-        
         <div class="form-group"><label>日期時間</label><input type="datetime-local" id="datetime" required></div>
         
         <div class="form-group">
@@ -41,7 +40,7 @@
         </div>
 
         <div class="form-group">
-            <label id="flightLabel">航班資訊</label>
+            <label id="flightLabel">航班資訊</label> <!-- 確保這裡有 id -->
             <input type="text" id="flight" placeholder="如：BR191" required>
         </div>
         
@@ -74,18 +73,19 @@
     const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
     async function init() {
+        const btn = document.getElementById('submitBtn');
         try {
             await liff.init({ liffId: LIFF_ID });
             if (!liff.isLoggedIn()) {
                 liff.login();
             } else {
-                const btn = document.getElementById('submitBtn');
                 btn.disabled = false;
                 btn.innerText = "確認送出預約";
                 btn.onclick = sendOrder;
             }
         } catch (err) {
-            alert("❌ 初始化失敗：" + err.message);
+            btn.innerText = "初始化失敗 (請在LINE開啟)";
+            console.error(err);
         }
     }
     window.onload = init;
@@ -94,11 +94,8 @@
         const container = document.getElementById('addressContainer');
         const div = document.createElement('div');
         div.style = "display: flex; gap: 5px; margin-bottom: 5px;";
-        const type = document.getElementById('type').value;
-        const placeholderText = "請輸入詳細地址";
-        
         div.innerHTML = `
-            <input type="text" class="pickup-addr" placeholder="${placeholderText}" required>
+            <input type="text" class="pickup-addr" placeholder="請輸入詳細地址" required>
             <button type="button" onclick="this.parentElement.remove()" style="width: 45px; margin-top: 0; padding: 5px; background-color: #d9534f; color: white; border: none; border-radius: 4px;">－</button>
         `;
         container.appendChild(div);
@@ -114,13 +111,13 @@
         if (type === "送機") {
             note.style.display = "block";
             addrLabel.innerText = "上車地點";
-            flightLabel.innerText = "抵達機場/航廈";
-            flightInput.placeholder = "如：桃園機場第一航廈";
+            if(flightLabel) flightLabel.innerText = "抵達機場/航廈";
+            if(flightInput) flightInput.placeholder = "如：桃園機場第一航廈";
         } else {
             note.style.display = "none";
             addrLabel.innerText = "下車地點";
-            flightLabel.innerText = "航班資訊";
-            flightInput.placeholder = "如：BR191";
+            if(flightLabel) flightLabel.innerText = "航班資訊";
+            if(flightInput) flightInput.placeholder = "如：BR191";
         }
     }
 
@@ -136,7 +133,7 @@
 
         const formattedDt = rawDt.replace('-', '年').replace('-', '月').replace('T', '日 ');
         const addrType = (type === "送機") ? "上車" : "下車";
-        const flightInfoLabel = (type === "送機") ? "目的地" : "航班";
+        const flightInfoLabel = (type === "送機") ? "地點" : "航班";
 
         const addrInputs = document.querySelectorAll('.pickup-addr');
         let addresses = [];
@@ -167,7 +164,7 @@
             alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
             liff.closeWindow();
         } catch (err) {
-            alert("❌ 傳送失敗：" + err.message);
+            alert("❌ 傳送失敗：" + err.message + "\n請確認是否有 chat_message.write 權限");
         }
     }
 </script>
