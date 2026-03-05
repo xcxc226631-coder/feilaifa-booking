@@ -9,10 +9,13 @@
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
         .time-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background: white; text-align: center; cursor: pointer; font-weight: bold; }
         .time-btn.active { border-color: #00b900; background-color: #e6f7e6; color: #00b900; }
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
+        .checkbox-item { display: flex; align-items: center; font-weight: normal; font-size: 14px; cursor: pointer; }
+        .checkbox-item input { margin-right: 8px; width: 18px; height: 18px; }
         .btn { background-color: #00b900; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn:active { background-color: #009000; }
         h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
@@ -29,7 +32,6 @@
             <div id="btnNow" class="time-btn active" onclick="selectTimeType('now')">現在（即時）</div>
             <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車專區</div>
         </div>
-        
         <div id="timeInputSection">
             <label style="font-size: 12px; color: #666;">請選取預約日期與時間：</label>
             <input type="datetime-local" id="time">
@@ -58,8 +60,17 @@
     </div>
 
     <div class="form-group">
-        <label>備註 (行李/禁菸等)</label>
-        <textarea id="note" rows="2" placeholder="例：有大行李、不菸不檳榔"></textarea>
+        <label>需求選項 (可複選)</label>
+        <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="prefs" value="禁菸車">禁菸車</label>
+            <label class="checkbox-item"><input type="checkbox" name="prefs" value="不想聊天">不想聊天</label>
+            <label class="checkbox-item"><input type="checkbox" name="prefs" value="不放音樂">不放音樂</label>
+            <label class="checkbox-item"><input type="checkbox" name="prefs" value="想抽電子菸">想抽電子菸</label>
+            <label class="checkbox-item"><input type="checkbox" name="prefs" value="想抽紙菸">想抽紙菸</label>
+            <label class="checkbox-item"><input type="checkbox" name="prefs" value="想抽加熱菸">想抽加熱菸</label>
+        </div>
+        <label>其他備註 (如：行李箱大小)</label>
+        <textarea id="note" rows="2" placeholder="如有其他特殊需求請註明"></textarea>
     </div>
 
     <button class="btn" id="submitBtn">確認送出預約</button>
@@ -85,7 +96,6 @@
         }
 
         async function main() {
-            // 【重要】請務必填入您的 LIFF ID
             await liff.init({ liffId: "2009263508-NTuggdp5" });
 
             document.getElementById('submitBtn').addEventListener('click', async () => {
@@ -93,7 +103,19 @@
                 const pickup = document.getElementById('pickup').value;
                 const dropoff = document.getElementById('dropoff').value;
                 const passengers = document.getElementById('passengers').value;
-                const note = document.getElementById('note').value || "無";
+                
+                // 處理勾選項目
+                const checkboxes = document.querySelectorAll('input[name="prefs"]:checked');
+                let selectedPrefs = Array.from(checkboxes).map(cb => cb.value).join('、');
+                const noteInput = document.getElementById('note').value;
+
+                // 整合備註文字
+                let finalNote = "";
+                if (selectedPrefs && noteInput) {
+                    finalNote = `${selectedPrefs} | ${noteInput}`;
+                } else {
+                    finalNote = selectedPrefs || noteInput || "無";
+                }
 
                 let finalTime = (selectedType === 'now') ? "即時" : timeValue.replace('T', ' ');
 
@@ -106,27 +128,17 @@
                     return;
                 }
 
-                const msg = `🀄️飛來發預約單🀄️\n時間：${finalTime}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${note}`;
+                const msg = `🀄️飛來發預約單🀄️\n時間：${finalTime}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${finalNote}`;
 
-                               try {
-                    // 同時放入兩個訊息物件，LINE 會按順序發送
+                try {
                     await liff.sendMessages([
-                        {
-                            type: 'text',
-                            text: '我要叫車'
-                        },
-                        {
-                            type: 'text',
-                            text: msg
-                        }
+                        { type: 'text', text: '我要叫車' },
+                        { type: 'text', text: msg }
                     ]);
-                    // 發送成功後關閉視窗
                     liff.closeWindow(); 
                 } catch (err) {
-                    // 加入 err 顯示具體錯誤，方便調試
-                    alert("傳送失敗：" + err.message + "\n請確認是否有勾選 chat_message.write 權限");
+                    alert("傳送失敗：" + err.message);
                 }
-
             });
         }
         main();
