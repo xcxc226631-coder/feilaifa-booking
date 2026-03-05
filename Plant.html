@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機場接送預約</title>
+    <!-- 引入 LIFF SDK -->
     <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; }
@@ -26,8 +27,13 @@
                 <option value="送機">送機 (市區 → 機場)</option>
             </select>
         </div>
+
         <div id="transferNote">⚠️ 提醒：送機時間請填寫「司機到上車點」的時間</div>
-        <div class="form-group"><label>日期時間</label><input type="datetime-local" id="datetime" required></div>
+        
+        <div class="form-group">
+            <label>日期時間</label>
+            <input type="datetime-local" id="datetime" required>
+        </div>
         
         <div class="form-group">
             <label id="addrLabel">下車地點</label>
@@ -40,14 +46,18 @@
         </div>
 
         <div class="form-group">
-            <label id="flightLabel">航班資訊</label> <!-- 確保這裡有 id -->
+            <label id="flightLabel">航班資訊</label>
             <input type="text" id="flight" placeholder="如：BR191" required>
         </div>
         
         <div class="form-group">
             <label>人數</label>
             <select id="passengers">
-                <script>for(let i=1; i<=8; i++) document.write(`<option value="${i}">${i}人</option>`);</script>
+                <!-- 預設生成 1-8 人 -->
+                <option value="1">1人</option><option value="2">2人</option>
+                <option value="3">3人</option><option value="4">4人</option>
+                <option value="5">5人</option><option value="6">6人</option>
+                <option value="7">7人</option><option value="8">8人</option>
             </select>
         </div>
 
@@ -66,13 +76,14 @@
             <input type="text" id="luggage" placeholder="例如：28吋*2, 20吋*1" required>
         </div>
 
-        <button type="button" id="submitBtn" disabled>載入中...</button>
+        <button type="button" id="submitBtn" disabled>正在與 LINE 連線...</button>
     </form>
 
-   <script>
+<script>
     const LIFF_ID = "2009263508-hAj1Qpgw"; 
 
-    async function init() {
+    // 初始化函數
+    async function initializeLiff() {
         const btn = document.getElementById('submitBtn');
         try {
             await liff.init({ liffId: LIFF_ID });
@@ -84,11 +95,14 @@
                 btn.onclick = sendOrder;
             }
         } catch (err) {
-            btn.innerText = "初始化失敗 (請在LINE開啟)";
-            console.error(err);
+            console.error("LIFF Init Error:", err);
+            btn.innerText = "初始化失敗 (請在 LINE 中開啟)";
+            // 提示開發者檢查後台 Scopes 是否有勾選 chat_message.write
         }
     }
-    window.onload = init;
+
+    // 確保 DOM 載入後才執行初始化
+    document.addEventListener("DOMContentLoaded", initializeLiff);
 
     function addAddress() {
         const container = document.getElementById('addressContainer');
@@ -111,13 +125,13 @@
         if (type === "送機") {
             note.style.display = "block";
             addrLabel.innerText = "上車地點";
-            if(flightLabel) flightLabel.innerText = "抵達機場/航廈";
-            if(flightInput) flightInput.placeholder = "如：桃園機場第一航廈";
+            flightLabel.innerText = "抵達機場/航廈";
+            flightInput.placeholder = "如：桃園機場第一航廈";
         } else {
             note.style.display = "none";
             addrLabel.innerText = "下車地點";
-            if(flightLabel) flightLabel.innerText = "航班資訊";
-            if(flightInput) flightInput.placeholder = "如：BR191";
+            flightLabel.innerText = "航班資訊";
+            flightInput.placeholder = "如：BR191";
         }
     }
 
@@ -157,6 +171,7 @@
                       `行李：${luggage}`;
 
         try {
+            // 嘗試發送訊息
             await liff.sendMessages([
                 { type: 'text', text: '我要叫車' },
                 { type: 'text', text: msgText }
@@ -164,7 +179,7 @@
             alert("🎉 預約單已送出！\n請回聊天室確認預約內容。");
             liff.closeWindow();
         } catch (err) {
-            alert("❌ 傳送失敗：" + err.message + "\n請確認是否有 chat_message.write 權限");
+            alert("❌ 傳送失敗：" + err.message + "\n\n常見原因：\n1. 未在 LINE 聊天室開啟\n2. 沒給予傳送訊息權限");
         }
     }
 </script>
