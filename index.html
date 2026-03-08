@@ -20,7 +20,6 @@
 
         input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
         
-        /* 預約時間提示文字樣式 */
         .time-hint { font-size: 13px; color: #d32f2f; margin-bottom: 5px; font-weight: bold; display: flex; align-items: center; }
         .time-hint::before { content: '📅 '; }
 
@@ -49,7 +48,6 @@
             <div id="btnNow" class="time-btn active" onclick="selectTimeType('now')">現在（即時）</div>
             <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車</div>
         </div>
-        <!-- 新增提示文字與優化後的選取框 -->
         <div id="timeInputSection">
             <div class="time-hint">請點擊下方欄位選取預約日期與時間</div>
             <input type="datetime-local" id="time">
@@ -103,7 +101,7 @@
             <option value="2人">2人</option>
             <option value="3人">3人</option>
             <option value="4人">4人</option>
-            <option value="5人以上">5人以上</option>
+            <option id="optMore" value="5人以上">5人以上</option>
         </select>
     </div>
 
@@ -126,8 +124,22 @@
             selectedRole = role;
             document.getElementById('roleNormal').classList.toggle('active', role === 'normal');
             document.getElementById('roleMackay').classList.toggle('active', role === 'mackay');
-            document.getElementById('mackayZone').style.display = (role === 'mackay') ? 'block' : 'none';
-            document.getElementById('normalZone').style.display = (role === 'mackay') ? 'none' : 'block';
+            
+            const isMackay = (role === 'mackay');
+            document.getElementById('mackayZone').style.display = isMackay ? 'block' : 'none';
+            document.getElementById('normalZone').style.display = isMackay ? 'none' : 'block';
+
+            // 人數限制邏輯
+            const passSelect = document.getElementById('passengers');
+            const optMore = document.getElementById('optMore');
+            if (isMackay) {
+                optMore.disabled = true;
+                if (passSelect.value === "5人以上") {
+                    passSelect.value = "1人"; // 若原本選5人則重置
+                }
+            } else {
+                optMore.disabled = false;
+            }
         }
 
         function selectTimeType(type) {
