@@ -11,7 +11,7 @@
         .form-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 15px; color: #444; }
         
-        /* 乘客類別切換按鈕 */
+        /* 乘客類別按鈕 */
         .role-options { display: flex; gap: 10px; margin-bottom: 15px; }
         .role-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .role-btn.active { border-color: #007bff; background-color: #e7f1ff; color: #007bff; }
@@ -36,10 +36,10 @@
     <h2>🀄️ 飛來發預約單 🀄️</h2>
 
     <div class="form-group">
-        <label>👤 乘客身份 (請點選)</label>
+        <label>👤 乘客身份</label>
         <div class="role-options">
             <div id="roleNormal" class="role-btn active" onclick="selectRole('normal')">一般乘客</div>
-            <div id="roleMackay" class="role-btn special" onclick="selectRole('mackay')">🎓 馬偕學生專區</div>
+            <div id="roleMackay" class="role-btn special" onclick="selectRole('mackay')">馬偕學生</div>
         </div>
     </div>
 
@@ -69,7 +69,7 @@
     <!-- 馬偕專用勾選區 -->
     <div id="mackayZone" class="mackay-box">
         <div class="form-group">
-            <label>📍上車點</label>
+            <label>📍 馬偕專用上車點</label>
             <select id="mPickup" onchange="checkOther('mPickup', 'mPickupOther')">
                 <option value="舊棟">舊棟</option>
                 <option value="新棟">新棟</option>
@@ -82,7 +82,7 @@
             <input type="text" id="mPickupOther" class="other-input" placeholder="請輸入上車位置">
         </div>
         <div class="form-group">
-            <label>🏁下車點</label>
+            <label>🏁 馬偕專用下車點</label>
             <select id="mDropoff" onchange="checkOther('mDropoff', 'mDropoffOther')">
                 <option value="舊棟">舊棟</option>
                 <option value="新棟">新棟</option>
@@ -161,7 +161,7 @@
             const timeStr = (selectedTime === 'now') ? "現在(即時)" : document.getElementById('time').value.replace('T', ' ');
             const psng = document.getElementById('passengers').value;
             const note = document.getElementById('note').value || "無";
-            const roleTag = isMackay ? "【馬偕專區】" : "【一般叫車】";
+            const roleTag = isMackay ? "【馬偕學生】" : "【一般叫車】";
 
             if (!pickup || !dropoff || (selectedTime === 'booking' && !document.getElementById('time').value)) {
                 alert("請完整填寫地點與時間");
