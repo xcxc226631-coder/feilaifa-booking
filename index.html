@@ -11,19 +11,19 @@
         .form-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 15px; color: #444; }
         
-        /* 乘客類別按鈕 */
-        .role-options { display: flex; gap: 10px; margin-bottom: 15px; }
-        .role-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .role-options, .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
+        .role-btn, .time-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        
         .role-btn.active { border-color: #007bff; background-color: #e7f1ff; color: #007bff; }
         .role-btn.special.active { border-color: #d32f2f; background-color: #fff5f5; color: #d32f2f; }
-
-        /* 時間選項按鈕 */
-        .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
-        .time-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; }
         .time-btn.active { border-color: #333; background-color: #f0f0f0; }
 
         input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
         
+        /* 預約時間提示文字樣式 */
+        .time-hint { font-size: 13px; color: #d32f2f; margin-bottom: 5px; font-weight: bold; display: flex; align-items: center; }
+        .time-hint::before { content: '📅 '; }
+
         .btn { background-color: #d32f2f; color: white; border: none; padding: 16px; border-radius: 12px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn:active { transform: translateY(2px); box-shadow: none; }
         
@@ -49,12 +49,13 @@
             <div id="btnNow" class="time-btn active" onclick="selectTimeType('now')">現在（即時）</div>
             <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車</div>
         </div>
+        <!-- 新增提示文字與優化後的選取框 -->
         <div id="timeInputSection">
+            <div class="time-hint">請點擊下方欄位選取預約日期與時間</div>
             <input type="datetime-local" id="time">
         </div>
     </div>
 
-    <!-- 一般地點輸入 -->
     <div id="normalZone">
         <div class="form-group">
             <label>📍 上車地點</label>
@@ -66,7 +67,6 @@
         </div>
     </div>
 
-    <!-- 馬偕專用勾選區 -->
     <div id="mackayZone" class="mackay-box">
         <div class="form-group">
             <label>📍 馬偕專用上車點</label>
@@ -126,10 +126,8 @@
             selectedRole = role;
             document.getElementById('roleNormal').classList.toggle('active', role === 'normal');
             document.getElementById('roleMackay').classList.toggle('active', role === 'mackay');
-            
-            const isMackay = (role === 'mackay');
-            document.getElementById('mackayZone').style.display = isMackay ? 'block' : 'none';
-            document.getElementById('normalZone').style.display = isMackay ? 'none' : 'block';
+            document.getElementById('mackayZone').style.display = (role === 'mackay') ? 'block' : 'none';
+            document.getElementById('normalZone').style.display = (role === 'mackay') ? 'none' : 'block';
         }
 
         function selectTimeType(type) {
