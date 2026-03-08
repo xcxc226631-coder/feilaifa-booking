@@ -3,38 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飛來發車隊-馬偕預約系統</title>
+    <title>飛來發車隊-快速叫車</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
-        input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; letter-spacing: 2px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 15px; color: #444; }
+        
+        /* 乘客類別切換按鈕 */
+        .role-options { display: flex; gap: 10px; margin-bottom: 15px; }
+        .role-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .role-btn.active { border-color: #007bff; background-color: #e7f1ff; color: #007bff; }
+        .role-btn.special.active { border-color: #d32f2f; background-color: #fff5f5; color: #d32f2f; }
+
+        /* 時間選項按鈕 */
         .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
-        .time-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background: white; text-align: center; cursor: pointer; font-weight: bold; }
-        .time-btn.active { border-color: #d32f2f; background-color: #fff5f5; color: #d32f2f; }
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
-        .checkbox-item { display: flex; align-items: center; font-weight: normal; font-size: 14px; cursor: pointer; }
-        .btn { background-color: #d32f2f; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
-        .special-zone { background: #fff3f3; padding: 15px; border-radius: 10px; border: 1px dashed #d32f2f; margin-bottom: 15px; }
-        #timeInputSection, .other-input { display: none; margin-top: 10px; }
+        .time-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; }
+        .time-btn.active { border-color: #333; background-color: #f0f0f0; }
+
+        input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn { background-color: #d32f2f; color: white; border: none; padding: 16px; border-radius: 12px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        #timeInputSection, .other-input, #mackayZone { display: none; margin-top: 10px; }
+        .mackay-box { background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #ffcccc; }
     </style>
 </head>
 <body>
 
     <h2>🀄️ 飛來發預約單 🀄️</h2>
 
-    <div class="special-zone">
-        <label style="color: #d32f2f;">⭐ 乘客類別</label>
-        <select id="userRole" onchange="toggleZone()">
-            <option value="一般乘客">一般乘客</option>
-            <option value="馬偕學生">🎓 馬偕學生專區 (自動標記)</option>
-        </select>
+    <div class="form-group">
+        <label>👤 乘客身份 (請點選)</label>
+        <div class="role-options">
+            <div id="roleNormal" class="role-btn active" onclick="selectRole('normal')">一般乘客</div>
+            <div id="roleMackay" class="role-btn special" onclick="selectRole('mackay')">🎓 馬偕學生專區</div>
+        </div>
     </div>
 
     <div class="form-group">
-        <label>用車時間</label>
+        <label>🕒 用車時間</label>
         <div class="time-options">
             <div id="btnNow" class="time-btn active" onclick="selectTimeType('now')">現在（即時）</div>
             <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車</div>
@@ -47,19 +57,19 @@
     <!-- 一般地點輸入 -->
     <div id="normalZone">
         <div class="form-group">
-            <label>上車地點</label>
+            <label>📍 上車地點</label>
             <input type="text" id="pickup" placeholder="請輸入地址或地標">
         </div>
         <div class="form-group">
-            <label>下車地點</label>
+            <label>🏁 下車地點</label>
             <input type="text" id="dropoff" placeholder="請輸入目的地">
         </div>
     </div>
 
-    <!-- 馬偕專用地點 -->
-    <div id="mackayZone" style="display:none;">
+    <!-- 馬偕專用勾選區 -->
+    <div id="mackayZone" class="mackay-box">
         <div class="form-group">
-            <label>📍 馬偕上車點</label>
+            <label>📍上車點</label>
             <select id="mPickup" onchange="checkOther('mPickup', 'mPickupOther')">
                 <option value="舊棟">舊棟</option>
                 <option value="新棟">新棟</option>
@@ -72,7 +82,7 @@
             <input type="text" id="mPickupOther" class="other-input" placeholder="請輸入上車位置">
         </div>
         <div class="form-group">
-            <label>🏁 馬偕下車點</label>
+            <label>🏁下車點</label>
             <select id="mDropoff" onchange="checkOther('mDropoff', 'mDropoffOther')">
                 <option value="舊棟">舊棟</option>
                 <option value="新棟">新棟</option>
@@ -87,7 +97,7 @@
     </div>
 
     <div class="form-group">
-        <label>乘車人數</label>
+        <label>👥 乘車人數</label>
         <select id="passengers">
             <option value="1人">1人</option>
             <option value="2人">2人</option>
@@ -98,23 +108,35 @@
     </div>
 
     <div class="form-group">
-        <label>備註需求</label>
-        <textarea id="note" rows="2" placeholder="行李箱大小或特殊需求"></textarea>
+        <label>📝 備註需求</label>
+        <textarea id="note" rows="2" placeholder="行李箱、寵物或特殊需求"></textarea>
     </div>
 
     <button class="btn" id="submitBtn">確認送出預約</button>
 
     <script>
-        let selectedType = 'now';
+        let selectedRole = 'normal';
+        let selectedTime = 'now';
 
         async function main() {
             await liff.init({ liffId: "2009263508-NTuggdp5" });
         }
 
-        function toggleZone() {
-            const isMackay = document.getElementById('userRole').value === '馬偕學生';
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('roleNormal').classList.toggle('active', role === 'normal');
+            document.getElementById('roleMackay').classList.toggle('active', role === 'mackay');
+            
+            const isMackay = (role === 'mackay');
             document.getElementById('mackayZone').style.display = isMackay ? 'block' : 'none';
             document.getElementById('normalZone').style.display = isMackay ? 'none' : 'block';
+        }
+
+        function selectTimeType(type) {
+            selectedTime = type;
+            document.getElementById('btnNow').classList.toggle('active', type === 'now');
+            document.getElementById('btnBooking').classList.toggle('active', type === 'booking');
+            document.getElementById('timeInputSection').style.display = (type === 'booking') ? 'block' : 'none';
         }
 
         function checkOther(selectId, inputId) {
@@ -122,16 +144,9 @@
             document.getElementById(inputId).style.display = (val === '其他') ? 'block' : 'none';
         }
 
-        function selectTimeType(type) {
-            selectedType = type;
-            document.getElementById('btnNow').classList.toggle('active', type === 'now');
-            document.getElementById('btnBooking').classList.toggle('active', type === 'booking');
-            document.getElementById('timeInputSection').style.display = (type === 'booking') ? 'block' : 'none';
-        }
-
         document.getElementById('submitBtn').addEventListener('click', async () => {
-            const isMackay = document.getElementById('userRole').value === '馬偕學生';
             let pickup, dropoff;
+            const isMackay = (selectedRole === 'mackay');
 
             if (isMackay) {
                 const p = document.getElementById('mPickup').value;
@@ -143,17 +158,17 @@
                 dropoff = document.getElementById('dropoff').value;
             }
 
-            const time = (selectedType === 'now') ? "現在(即時)" : document.getElementById('time').value.replace('T', ' ');
+            const timeStr = (selectedTime === 'now') ? "現在(即時)" : document.getElementById('time').value.replace('T', ' ');
             const psng = document.getElementById('passengers').value;
             const note = document.getElementById('note').value || "無";
             const roleTag = isMackay ? "【馬偕專區】" : "【一般叫車】";
 
-            if (!pickup || !dropoff || (selectedType === 'booking' && !document.getElementById('time').value)) {
+            if (!pickup || !dropoff || (selectedTime === 'booking' && !document.getElementById('time').value)) {
                 alert("請完整填寫地點與時間");
                 return;
             }
 
-            const msg = `${roleTag}\n時間：${time}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${note}`;
+            const msg = `${roleTag}\n時間：${timeStr}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${note}`;
 
             try {
                 await liff.sendMessages([{ type: 'text', text: msg }]);
