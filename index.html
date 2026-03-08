@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飛來發線上預約</title>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <title>飛來發車隊-馬偕預約系統</title>
+    <script src="https://static.line-scdn.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; color: #333; }
         .form-group { margin-bottom: 15px; }
@@ -12,40 +12,78 @@
         input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
         .time-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background: white; text-align: center; cursor: pointer; font-weight: bold; }
-        .time-btn.active { border-color: #00b900; background-color: #e6f7e6; color: #00b900; }
+        .time-btn.active { border-color: #d32f2f; background-color: #fff5f5; color: #d32f2f; }
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
         .checkbox-item { display: flex; align-items: center; font-weight: normal; font-size: 14px; cursor: pointer; }
-        .checkbox-item input { margin-right: 8px; width: 18px; height: 18px; }
-        .btn { background-color: #00b900; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn:active { background-color: #009000; }
+        .btn { background-color: #d32f2f; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
-        #timeInputSection { display: none; margin-top: 10px; }
+        .special-zone { background: #fff3f3; padding: 15px; border-radius: 10px; border: 1px dashed #d32f2f; margin-bottom: 15px; }
+        #timeInputSection, .other-input { display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <h2>🀄️ 飛來發預約單 🀄️</h2>
 
+    <div class="special-zone">
+        <label style="color: #d32f2f;">⭐ 乘客類別</label>
+        <select id="userRole" onchange="toggleZone()">
+            <option value="一般乘客">一般乘客</option>
+            <option value="馬偕學生">🎓 馬偕學生專區 (自動標記)</option>
+        </select>
+    </div>
+
     <div class="form-group">
         <label>用車時間</label>
         <div class="time-options">
             <div id="btnNow" class="time-btn active" onclick="selectTimeType('now')">現在（即時）</div>
-            <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車專區</div>
+            <div id="btnBooking" class="time-btn" onclick="selectTimeType('booking')">預約叫車</div>
         </div>
         <div id="timeInputSection">
-            <label style="font-size: 12px; color: #666;">請選取預約日期與時間：</label>
             <input type="datetime-local" id="time">
         </div>
     </div>
 
-    <div class="form-group">
-        <label>上車地點</label>
-        <input type="text" id="pickup" placeholder="請輸入地址或地標">
+    <!-- 一般地點輸入 -->
+    <div id="normalZone">
+        <div class="form-group">
+            <label>上車地點</label>
+            <input type="text" id="pickup" placeholder="請輸入地址或地標">
+        </div>
+        <div class="form-group">
+            <label>下車地點</label>
+            <input type="text" id="dropoff" placeholder="請輸入目的地">
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>下車地點</label>
-        <input type="text" id="dropoff" placeholder="請輸入目的地">
+    <!-- 馬偕專用地點 -->
+    <div id="mackayZone" style="display:none;">
+        <div class="form-group">
+            <label>📍 馬偕上車點</label>
+            <select id="mPickup" onchange="checkOther('mPickup', 'mPickupOther')">
+                <option value="舊棟">舊棟</option>
+                <option value="新棟">新棟</option>
+                <option value="校門">校門</option>
+                <option value="淡水捷運站">淡水捷運站</option>
+                <option value="紅樹林站">紅樹林站</option>
+                <option value="大都會廣場">大都會廣場</option>
+                <option value="其他">其他 (自行輸入)</option>
+            </select>
+            <input type="text" id="mPickupOther" class="other-input" placeholder="請輸入上車位置">
+        </div>
+        <div class="form-group">
+            <label>🏁 馬偕下車點</label>
+            <select id="mDropoff" onchange="checkOther('mDropoff', 'mDropoffOther')">
+                <option value="舊棟">舊棟</option>
+                <option value="新棟">新棟</option>
+                <option value="校門">校門</option>
+                <option value="淡水捷運站">淡水捷運站</option>
+                <option value="紅樹林站">紅樹林站</option>
+                <option value="大都會廣場">大都會廣場</option>
+                <option value="其他">其他 (自行輸入)</option>
+            </select>
+            <input type="text" id="mDropoffOther" class="other-input" placeholder="請輸入下車位置">
+        </div>
     </div>
 
     <div class="form-group">
@@ -55,22 +93,13 @@
             <option value="2人">2人</option>
             <option value="3人">3人</option>
             <option value="4人">4人</option>
-            <option value="5人以上">5人以上 (請於備註說明)</option>
+            <option value="5人以上">5人以上</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label>需求選項 (可複選)</label>
-        <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" name="prefs" value="禁菸車">禁菸車</label>
-            <label class="checkbox-item"><input type="checkbox" name="prefs" value="不想聊天">不想聊天</label>
-            <label class="checkbox-item"><input type="checkbox" name="prefs" value="不放音樂">不放音樂</label>
-            <label class="checkbox-item"><input type="checkbox" name="prefs" value="想抽電子菸">想抽電子菸</label>
-            <label class="checkbox-item"><input type="checkbox" name="prefs" value="想抽紙菸">想抽紙菸</label>
-            <label class="checkbox-item"><input type="checkbox" name="prefs" value="想抽加熱菸">想抽加熱菸</label>
-        </div>
-        <label>其他備註 (如：行李箱大小)</label>
-        <textarea id="note" rows="2" placeholder="如有其他特殊需求請註明"></textarea>
+        <label>備註需求</label>
+        <textarea id="note" rows="2" placeholder="行李箱大小或特殊需求"></textarea>
     </div>
 
     <button class="btn" id="submitBtn">確認送出預約</button>
@@ -78,69 +107,62 @@
     <script>
         let selectedType = 'now';
 
-        function selectTimeType(type) {
-            selectedType = type;
-            const btnNow = document.getElementById('btnNow');
-            const btnBooking = document.getElementById('btnBooking');
-            const timeSection = document.getElementById('timeInputSection');
-
-            if (type === 'now') {
-                btnNow.classList.add('active');
-                btnBooking.classList.remove('active');
-                timeSection.style.display = 'none';
-            } else {
-                btnNow.classList.remove('active');
-                btnBooking.classList.add('active');
-                timeSection.style.display = 'block';
-            }
-        }
-
         async function main() {
             await liff.init({ liffId: "2009263508-NTuggdp5" });
-
-            document.getElementById('submitBtn').addEventListener('click', async () => {
-                const timeValue = document.getElementById('time').value;
-                const pickup = document.getElementById('pickup').value;
-                const dropoff = document.getElementById('dropoff').value;
-                const passengers = document.getElementById('passengers').value;
-                
-                // 處理勾選項目
-                const checkboxes = document.querySelectorAll('input[name="prefs"]:checked');
-                let selectedPrefs = Array.from(checkboxes).map(cb => cb.value).join('、');
-                const noteInput = document.getElementById('note').value;
-
-                // 整合備註文字
-                let finalNote = "";
-                if (selectedPrefs && noteInput) {
-                    finalNote = `${selectedPrefs} | ${noteInput}`;
-                } else {
-                    finalNote = selectedPrefs || noteInput || "無";
-                }
-
-                let finalTime = (selectedType === 'now') ? "即時" : timeValue.replace('T', ' ');
-
-                if (selectedType === 'booking' && !timeValue) {
-                    alert("請選取預約叫車的時間");
-                    return;
-                }
-                if (!pickup || !dropoff) {
-                    alert("請填寫上車及下車地點");
-                    return;
-                }
-
-                const msg = `🀄️飛來發預約單🀄️\n時間：${finalTime}\n上車：${pickup}\n下車：${dropoff}\n人數：${passengers}\n備註：${finalNote}`;
-
-                try {
-                    await liff.sendMessages([
-                        { type: 'text', text: '我要叫車' },
-                        { type: 'text', text: msg }
-                    ]);
-                    liff.closeWindow(); 
-                } catch (err) {
-                    alert("傳送失敗：" + err.message);
-                }
-            });
         }
+
+        function toggleZone() {
+            const isMackay = document.getElementById('userRole').value === '馬偕學生';
+            document.getElementById('mackayZone').style.display = isMackay ? 'block' : 'none';
+            document.getElementById('normalZone').style.display = isMackay ? 'none' : 'block';
+        }
+
+        function checkOther(selectId, inputId) {
+            const val = document.getElementById(selectId).value;
+            document.getElementById(inputId).style.display = (val === '其他') ? 'block' : 'none';
+        }
+
+        function selectTimeType(type) {
+            selectedType = type;
+            document.getElementById('btnNow').classList.toggle('active', type === 'now');
+            document.getElementById('btnBooking').classList.toggle('active', type === 'booking');
+            document.getElementById('timeInputSection').style.display = (type === 'booking') ? 'block' : 'none';
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const isMackay = document.getElementById('userRole').value === '馬偕學生';
+            let pickup, dropoff;
+
+            if (isMackay) {
+                const p = document.getElementById('mPickup').value;
+                pickup = (p === '其他') ? document.getElementById('mPickupOther').value : p;
+                const d = document.getElementById('mDropoff').value;
+                dropoff = (d === '其他') ? document.getElementById('mDropoffOther').value : d;
+            } else {
+                pickup = document.getElementById('pickup').value;
+                dropoff = document.getElementById('dropoff').value;
+            }
+
+            const time = (selectedType === 'now') ? "現在(即時)" : document.getElementById('time').value.replace('T', ' ');
+            const psng = document.getElementById('passengers').value;
+            const note = document.getElementById('note').value || "無";
+            const roleTag = isMackay ? "【馬偕專區】" : "【一般叫車】";
+
+            if (!pickup || !dropoff || (selectedType === 'booking' && !document.getElementById('time').value)) {
+                alert("請完整填寫地點與時間");
+                return;
+            }
+
+            const msg = `${roleTag}\n時間：${time}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${note}`;
+
+            try {
+                await liff.sendMessages([{ type: 'text', text: msg }]);
+                liff.closeWindow();
+            } catch (err) {
+                alert("傳送失敗：" + err.message);
+            }
+        });
+
         main();
     </script>
 </body>
