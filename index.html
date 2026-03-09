@@ -33,7 +33,7 @@
 </head>
 <body>
 
-    <h2>🀄️ 飛來發預約單 🀄️</h2>
+    <h2>⚜️ 飛來發預約單 ⚜️</h2>
 
     <div class="form-group">
         <label>👤 乘客身份</label>
@@ -194,7 +194,7 @@
                 return;
             }
 
-            const msg = `🀄️飛來發預約單🀄️\n類型：${roleTag}\n時間：${timeStr}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${finalNote}`;
+            const msg = `⚜️ 飛來發預約單 ⚜️\n類型：${roleTag}\n時間：${timeStr}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${finalNote}`;
 
             try {
                 await liff.sendMessages([{ type: 'text', text: '我要叫車' }, { type: 'text', text: msg }]);
