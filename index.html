@@ -6,89 +6,30 @@
     <title>飛來發車隊-快速叫車</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-    /* 1. 全局背景：深色放射狀漸層，營造高級光源感 */
-    body { 
-        font-family: -apple-system, "Noto Sans TC", sans-serif; 
-        padding: 20px; 
-        background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); 
-        color: #D4AF37; /* 主要文字改為金色 */
-    }
+        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; letter-spacing: 2px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; color: #444; }
 
-    /* 2. 標題：加上您選好的奢華符號與字距 */
-    h2 { 
-        text-align: center; 
-        color: #D4AF37; 
-        margin-bottom: 30px; 
-        letter-spacing: 4px; 
-        font-weight: 300;
-    }
+        .role-options, .time-options { display: flex; gap: 10px; margin-bottom: 10px; }
+        .role-btn, .time-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 10px; background: white; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; }
 
-    /* 3. 表單群組與標籤 */
-    label { 
-        display: block; 
-        margin-bottom: 10px; 
-        font-weight: bold; 
-        font-size: 14px; 
-        color: #D4AF37; /* 標籤統一金色 */
-        letter-spacing: 1px;
-    }
+        .role-btn.active { border-color: #007bff; background-color: #e7f1ff; color: #007bff; }
+        .role-btn.special.active { border-color: #d32f2f; background-color: #fff5f5; color: #d32f2f; }
+        .time-btn.active { border-color: #00b900; background-color: #e6f7e6; color: #00b900; }
 
-    /* 4. 按鈕選項樣式：半透明深色背景 + 金色細邊框 */
-    .role-btn, .time-btn { 
-        flex: 1; 
-        padding: 12px; 
-        border: 1px solid #444; /* 平時較暗的邊框 */
-        border-radius: 5px; 
-        background: rgba(255, 255, 255, 0.05); 
-        color: #888; 
-        text-align: center; 
-        cursor: pointer; 
-        transition: 0.3s; 
-    }
+        input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
 
-    /* 選中後的樣式：發光金色邊框 */
-    .role-btn.active, .time-btn.active { 
-        border-color: #D4AF37; 
-        background-color: rgba(212, 175, 55, 0.1); 
-        color: #D4AF37; 
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-    }
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
+        .checkbox-item { display: flex; align-items: center; font-weight: normal; font-size: 14px; cursor: pointer; }
+        .checkbox-item input { margin-right: 8px; width: 18px; height: 18px; }
 
-    /* 5. 輸入框樣式：深色底金邊 */
-    input, input[type="datetime-local"], select, textarea { 
-        width: 100%; 
-        padding: 12px; 
-        border: 1px solid #333; 
-        border-radius: 5px; 
-        background-color: #111; 
-        color: #fff; 
-        font-size: 16px; 
-        box-sizing: border-box;
-    }
-    input:focus { border-color: #D4AF37; outline: none; }
+        .time-hint { font-size: 13px; color: #d32f2f; margin-bottom: 5px; font-weight: bold; }
+        .btn { background-color: #00b900; color: white; border: none; padding: 16px; border-radius: 12px; width: 100%; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
 
-    /* 6. 最下方的送出按鈕：純金色質感 */
-    .btn { 
-        background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); 
-        color: #000; 
-        border: none; 
-        padding: 18px; 
-        border-radius: 5px; 
-        width: 100%; 
-        font-size: 18px; 
-        font-weight: bold; 
-        cursor: pointer; 
-        margin-top: 25px; 
-        letter-spacing: 2px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    /* 7. 其他區塊調整 */
-    .checkbox-group { background: #111; border: 1px solid #333; color: #ccc; }
-    .time-hint { color: #ffab00; } /* 警告文字改為亮橙金色 */
-    .mackay-box { background: #1a1500; border: 1px solid #D4AF37; }
-</style>
-
+        #timeInputSection, .other-input, #mackayZone { display: none; margin-top: 10px; }
+        .mackay-box { background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #ffcccc; }
+    </style>
 </head>
 <body>
 
