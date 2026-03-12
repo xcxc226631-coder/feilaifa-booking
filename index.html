@@ -122,7 +122,6 @@
         <label>其他備註 (如：行李箱大小)</label>
         <textarea id="note" rows="2" placeholder="如有其他特殊需求請註明"></textarea>
     </div>
-
     <button class="btn" id="submitBtn">確認送出預約</button>
 
     <script>
@@ -181,20 +180,25 @@
             const timeStr = (selectedTime === 'now') ? "現在(即時)" : document.getElementById('time').value.replace('T', ' ');
             const psng = document.getElementById('passengers').value;
 
-            // 處理備註與勾選項目整合
             const checkboxes = document.querySelectorAll('input[name="prefs"]:checked');
             let selectedPrefs = Array.from(checkboxes).map(cb => cb.value).join('、');
             const noteInput = document.getElementById('note').value;
             let finalNote = (selectedPrefs && noteInput) ? `${selectedPrefs} | ${noteInput}` : (selectedPrefs || noteInput || "無");
 
-            const roleTag = isMackay ? "【馬偕學生】" : "【一般叫車】";
+            // --- 修改後的類型標籤判斷 ---
+            let roleTag;
+            if (isMackay) {
+                roleTag = (selectedTime === 'now') ? "【馬偕學生】" : "【馬偕預約】";
+            } else {
+                roleTag = "【一般叫車】";
+            }
 
             if (!pickup || !dropoff || (selectedTime === 'booking' && !document.getElementById('time').value)) {
                 alert("請完整填寫地點與時間");
                 return;
             }
             
-       const msg = `⚜️ 飛來發預約單 ⚜️\n類型：${roleTag}\n時間：${timeStr}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${finalNote}`;
+            const msg = `⚜️ 飛來發預約單 ⚜️\n類型：${roleTag}\n時間：${timeStr}\n上車：${pickup}\n下車：${dropoff}\n人數：${psng}\n備註：${finalNote}`;
 
             try {
                 await liff.sendMessages([{ type: 'text', text: '我要叫車' }, { type: 'text', text: msg }]);
